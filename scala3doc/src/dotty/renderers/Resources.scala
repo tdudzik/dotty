@@ -128,6 +128,14 @@ trait Resources(using ctx: DocContext) extends Locations, Writer:
     dottyRes("fonts/dotty-icons.woff"),
     dottyRes("fonts/dotty-icons.ttf"),
     dottyRes("images/scala3doc_logo.svg"),
+    dottyRes("images/github-icon-black.png"),
+    dottyRes("images/github-icon-white.png"),
+    dottyRes("images/discord-icon-black.png"),
+    dottyRes("images/discord-icon-white.png"),
+    dottyRes("images/twitter-icon-black.png"),
+    dottyRes("images/twitter-icon-white.png"),
+    dottyRes("images/gitter-icon-black.png"),
+    dottyRes("images/gitter-icon-white.png"),
     searchData(pages)
   )
 
