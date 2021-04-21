@@ -9,17 +9,17 @@ val topLevelDri = DRI("/")
 
 // we may need target...
 final case class DRI(
-  location: String,
-  anchor: String = "",
-  externalLink: Option[String] = None,
-  symbolUUID: String = ""
+    location: String,
+    anchor: String = "",
+    externalLink: Option[String] = None,
+    symbolUUID: String = ""
 ):
-  def withNoExternalLink = copy(externalLink = None)
+   def withNoExternalLink = copy(externalLink = None)
 
-  def isStaticFile = symbolUUID == staticFileSymbolUUID
+   def isStaticFile = symbolUUID == staticFileSymbolUUID
 
-  def asFileLocation: String = escapeUrl(location).replace(".", "/")
+   def asFileLocation: String = escapeUrl(location).replace(".", "/")
 
 object DRI:
-  def forPath(path: Path) =
-    DRI(location = path.toString, symbolUUID = staticFileSymbolUUID)
+   def forPath(path: Path) =
+      DRI(location = path.toString, symbolUUID = staticFileSymbolUUID)
