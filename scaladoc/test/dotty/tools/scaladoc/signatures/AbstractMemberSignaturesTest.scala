@@ -16,16 +16,27 @@ class AbstractMembers extends ScaladocTest("abstractmembersignatures"):
     afterRendering {
       val actualSignatures = signaturesFromDocumentation()
 
-      actualSignatures.foreach { (k, v) => k match
-        case "Abstract methods" => assertTrue(v.forall(_._2 == "shouldBeAbstract"))
-        case "Concrete methods" => assertTrue(v.forall(_._2 == "shouldBeConcrete"))
-        case "Classlikes" => assertTrue(v.forall((m, n) => m.contains("abstract") == n.contains("Abstract")))
-        case _ =>
+      actualSignatures.foreach { (k, v) =>
+        k match
+          case "Abstract methods" =>
+            assertTrue(v.forall(_._2 == "shouldBeAbstract"))
+          case "Concrete methods" =>
+            assertTrue(v.forall(_._2 == "shouldBeConcrete"))
+          case "Classlikes" =>
+            assertTrue(
+              v.forall((m, n) =>
+                m.contains("abstract") == n.contains("Abstract")
+              )
+            )
+          case _
+            =>
       }
     }
   }
 
-  private def signaturesFromDocumentation()(using DocContext): Map[String, List[(String, String)]] =
+  private def signaturesFromDocumentation()(using
+      DocContext
+  ): Map[String, List[(String, String)]] =
     val output = summon[DocContext].args.output.toPath.resolve("api")
     val signatures = List.newBuilder[(String, (String, String))]
     def processFile(path: Path): Unit =
@@ -33,8 +44,16 @@ class AbstractMembers extends ScaladocTest("abstractmembersignatures"):
       val content = document.select(".documentableList").forEach { elem =>
         val group = elem.select(".groupHeader").eachText.asScala.mkString("")
         elem.select(".documentableElement").forEach { elem =>
-          val modifiers = elem.select(".header .other-modifiers").eachText.asScala.mkString("")
-          val name = elem.select(".header .documentableName").eachText.asScala.mkString("")
+          val modifiers = elem
+            .select(".header .other-modifiers")
+            .eachText
+            .asScala
+            .mkString("")
+          val name = elem
+            .select(".header .documentableName")
+            .eachText
+            .asScala
+            .mkString("")
           signatures += group -> (modifiers, name)
         }
       }

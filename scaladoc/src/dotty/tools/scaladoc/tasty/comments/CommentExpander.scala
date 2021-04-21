@@ -5,7 +5,7 @@ import dotty.tools._
 import dotc._
 import core._
 
-import ast.{ untpd, tpd }
+import ast.{untpd, tpd}
 import Decorators._, Symbols._, Contexts._, Comments.{_, given}
 import util.{SourceFile, ReadOnlyMap}
 import util.Spans._
@@ -36,10 +36,13 @@ class CommentExpander {
     *                                  of the same string are done, which is
     *                                  interpreted as a recursive variable definition.
     */
-  def expandedDocComment(sym: Symbol, site: Symbol, docStr: String = "")(using Context): String = {
+  def expandedDocComment(sym: Symbol, site: Symbol, docStr: String = "")(using
+      Context
+  ): String = {
     // when parsing a top level class or module, use the (module-)class itself to look up variable definitions
-    val parent = if ((sym.is(Flags.Module) || sym.isClass) && site.is(Flags.Package)) sym
-                  else site
+    val parent =
+      if ((sym.is(Flags.Module) || sym.isClass) && site.is(Flags.Package)) sym
+      else site
     expandVariables(cookedDocComment(sym, docStr), sym, parent)
   }
 
@@ -55,12 +58,14 @@ class CommentExpander {
     defines map { case (start, end) => raw.substring(start, end) }
   }
 
-  private def replaceInheritDocToInheritdoc(docStr: String): String  =
+  private def replaceInheritDocToInheritdoc(docStr: String): String =
     docStr.replaceAll("""\{@inheritDoc\p{Zs}*\}""", "@inheritdoc")
 
   /** The cooked doc comment of an overridden symbol */
   protected def superComment(sym: Symbol)(using Context): Option[String] =
-    allInheritedOverriddenSymbols(sym).iterator map (x => cookedDocComment(x)) find (_ != "")
+    allInheritedOverriddenSymbols(sym).iterator map (x =>
+      cookedDocComment(x)
+    ) find (_ != "")
 
   private val cookedDocComments = MutableSymbolMap[String]()
 
@@ -69,39 +74,53 @@ class CommentExpander {
     *  If a symbol does not have a doc comment but some overridden version of it does,
     *  the doc comment of the overridden version is copied instead.
     */
-  def cookedDocComment(sym: Symbol, docStr: String = "")(using Context): String = cookedDocComments.getOrElseUpdate(sym, {
-    var ownComment =
-      if (docStr.length == 0) ctx.docCtx.flatMap(_.docstring(sym).map(c => template(c.raw))).getOrElse("")
-      else template(docStr)
-    ownComment = replaceInheritDocToInheritdoc(ownComment)
+  def cookedDocComment(sym: Symbol, docStr: String = "")(using
+      Context
+  ): String = cookedDocComments.getOrElseUpdate(
+    sym, {
+      var ownComment =
+        if (docStr.length == 0)
+          ctx.docCtx
+            .flatMap(_.docstring(sym).map(c => template(c.raw)))
+            .getOrElse("")
+        else template(docStr)
+      ownComment = replaceInheritDocToInheritdoc(ownComment)
 
-    superComment(sym) match {
-      case None =>
-        // SI-8210 - The warning would be false negative when this symbol is a setter
-        if (ownComment.indexOf("@inheritdoc") != -1 && ! sym.isSetter)
-          println(s"${sym.span}: the comment for ${sym} contains @inheritdoc, but no parent comment is available to inherit from.")
-        ownComment.replace("@inheritdoc", "<invalid inheritdoc annotation>")
-      case Some(sc) =>
-        if (ownComment == "") sc
-        else expandInheritdoc(sc, merge(sc, ownComment, sym), sym)
+      superComment(sym) match {
+        case None =>
+          // SI-8210 - The warning would be false negative when this symbol is a setter
+          if (ownComment.indexOf("@inheritdoc") != -1 && !sym.isSetter)
+            println(
+              s"${sym.span}: the comment for ${sym} contains @inheritdoc, but no parent comment is available to inherit from."
+            )
+          ownComment.replace("@inheritdoc", "<invalid inheritdoc annotation>")
+        case Some(sc) =>
+          if (ownComment == "") sc
+          else expandInheritdoc(sc, merge(sc, ownComment, sym), sym)
+      }
     }
-  })
+  )
 
   private def isMovable(str: String, sec: (Int, Int)): Boolean =
     startsWithTag(str, sec, "@param") ||
-    startsWithTag(str, sec, "@tparam") ||
-    startsWithTag(str, sec, "@return")
+      startsWithTag(str, sec, "@tparam") ||
+      startsWithTag(str, sec, "@return")
 
-  def merge(src: String, dst: String, sym: Symbol, copyFirstPara: Boolean = false): String = {
-    val srcSections  = tagIndex(src)
-    val dstSections  = tagIndex(dst)
-    val srcParams    = paramDocs(src, "@param", srcSections)
-    val dstParams    = paramDocs(dst, "@param", dstSections)
-    val srcTParams   = paramDocs(src, "@tparam", srcSections)
-    val dstTParams   = paramDocs(dst, "@tparam", dstSections)
-    val out          = new StringBuilder
-    var copied       = 0
-    var tocopy       = startTag(dst, dstSections dropWhile (!isMovable(dst, _)))
+  def merge(
+      src: String,
+      dst: String,
+      sym: Symbol,
+      copyFirstPara: Boolean = false
+  ): String = {
+    val srcSections = tagIndex(src)
+    val dstSections = tagIndex(dst)
+    val srcParams = paramDocs(src, "@param", srcSections)
+    val dstParams = paramDocs(dst, "@param", dstSections)
+    val srcTParams = paramDocs(src, "@tparam", srcSections)
+    val dstTParams = paramDocs(dst, "@tparam", dstSections)
+    val out = new StringBuilder
+    var copied = 0
+    var tocopy = startTag(dst, dstSections dropWhile (!isMovable(dst, _)))
 
     if (copyFirstPara) {
       val eop = // end of comment body (first para), which is delimited by blank line, or tag, or end of comment
@@ -111,19 +130,20 @@ class CommentExpander {
       tocopy = 3
     }
 
-    def mergeSection(srcSec: Option[(Int, Int)], dstSec: Option[(Int, Int)]) = dstSec match {
-      case Some((start, end)) =>
-        if (end > tocopy) tocopy = end
-      case None =>
-        srcSec match {
-          case Some((start1, end1)) =>
-            out append dst.substring(copied, tocopy).trim
-            out append "\n"
-            copied = tocopy
-            out append src.substring(start1, end1).trim
-          case None =>
-        }
-    }
+    def mergeSection(srcSec: Option[(Int, Int)], dstSec: Option[(Int, Int)]) =
+      dstSec match {
+        case Some((start, end)) =>
+          if (end > tocopy) tocopy = end
+        case None =>
+          srcSec match {
+            case Some((start1, end1)) =>
+              out append dst.substring(copied, tocopy).trim
+              out append "\n"
+              copied = tocopy
+              out append src.substring(start1, end1).trim
+            case None =>
+          }
+      }
 
     //TODO: enable this once you know how to get `sym.paramss`
     /*
@@ -134,7 +154,7 @@ class CommentExpander {
 
     mergeSection(returnDoc(src, srcSections), returnDoc(dst, dstSections))
     mergeSection(groupDoc(src, srcSections), groupDoc(dst, dstSections))
-    */
+     */
 
     if (out.length == 0) dst
     else {
@@ -143,8 +163,7 @@ class CommentExpander {
     }
   }
 
-  /**
-    * Expand inheritdoc tags
+  /** Expand inheritdoc tags
     *  - for the main comment we transform the inheritdoc into the super variable,
     *  and the variable expansion can expand it further
     *  - for the param, tparam and throws sections we must replace comments on the spot
@@ -160,18 +179,17 @@ class CommentExpander {
     * @return       The child comment with the inheritdoc sections expanded
     */
   def expandInheritdoc(parent: String, child: String, sym: Symbol): String =
-    if (child.indexOf("@inheritdoc") == -1)
-      child
+    if (child.indexOf("@inheritdoc") == -1) child
     else {
-      val parentSections    = tagIndex(parent)
-      val childSections     = tagIndex(child)
-      val parentTagMap      = sectionTagMap(parent, parentSections)
+      val parentSections = tagIndex(parent)
+      val childSections = tagIndex(child)
+      val parentTagMap = sectionTagMap(parent, parentSections)
       val parentNamedParams = Map() +
-        ("@param"  -> paramDocs(parent, "@param", parentSections)) +
+        ("@param" -> paramDocs(parent, "@param", parentSections)) +
         ("@tparam" -> paramDocs(parent, "@tparam", parentSections)) +
         ("@throws" -> paramDocs(parent, "@throws", parentSections))
 
-      val out         = new StringBuilder
+      val out = new StringBuilder
 
       def replaceInheritdoc(childSection: String, parentSection: => String) =
         if (childSection.indexOf("@inheritdoc") == -1)
@@ -182,26 +200,37 @@ class CommentExpander {
       def getParentSection(section: (Int, Int)): String = {
 
         def getSectionHeader = extractSectionTag(child, section) match {
-          case param@("@param"|"@tparam"|"@throws")  => param + " "  + extractSectionParam(child, section)
-          case other     => other
+          case param @ ("@param" | "@tparam" | "@throws") =>
+            param + " " + extractSectionParam(child, section)
+          case other => other
         }
 
-        def sectionString(param: String, paramMap: Map[String, (Int, Int)]): String =
+        def sectionString(
+            param: String,
+            paramMap: Map[String, (Int, Int)]
+        ): String =
           paramMap.get(param) match {
             case Some(section) =>
               // Cleanup the section tag and parameter
               val sectionTextBounds = extractSectionText(parent, section)
-              cleanupSectionText(parent.substring(sectionTextBounds._1, sectionTextBounds._2))
+              cleanupSectionText(
+                parent.substring(sectionTextBounds._1, sectionTextBounds._2)
+              )
             case None =>
-              println(s"""${sym.span}: the """" + getSectionHeader + "\" annotation of the " + sym +
-                  " comment contains @inheritdoc, but the corresponding section in the parent is not defined.")
+              println(
+                s"""${sym.span}: the """" + getSectionHeader + "\" annotation of the " + sym +
+                  " comment contains @inheritdoc, but the corresponding section in the parent is not defined."
+              )
               "<invalid inheritdoc annotation>"
           }
 
         child.substring(section._1, section._1 + 7) match {
-          case param@("@param "|"@tparam"|"@throws") =>
-            sectionString(extractSectionParam(child, section), parentNamedParams(param.trim))
-          case _                                     =>
+          case param @ ("@param " | "@tparam" | "@throws") =>
+            sectionString(
+              extractSectionParam(child, section),
+              parentNamedParams(param.trim)
+            )
+          case _ =>
             sectionString(extractSectionTag(child, section), parentTagMap)
         }
       }
@@ -214,31 +243,42 @@ class CommentExpander {
 
       // Append main comment
       out.append("/**")
-      out.append(replaceInheritdoc(mainComment(child, childSections), mainComment(parent, parentSections)))
+      out.append(
+        replaceInheritdoc(
+          mainComment(child, childSections),
+          mainComment(parent, parentSections)
+        )
+      )
 
       // Append sections
       for (section <- childSections)
-        out.append(replaceInheritdoc(child.substring(section._1, section._2), getParentSection(section)))
+        out.append(
+          replaceInheritdoc(
+            child.substring(section._1, section._2),
+            getParentSection(section)
+          )
+        )
 
       out.append("*/")
       out.toString
     }
 
-  protected def expandVariables(initialStr: String, sym: Symbol, site: Symbol)(using Context): String = {
+  protected def expandVariables(initialStr: String, sym: Symbol, site: Symbol)(
+      using Context
+  ): String = {
     val expandLimit = 10
 
     def expandInternal(str: String, depth: Int): String = {
       if (depth >= expandLimit)
         throw new ExpansionLimitExceeded(str)
 
-      val out         = new StringBuilder
+      val out = new StringBuilder
       var copied, idx = 0
       // excluding variables written as \$foo so we can use them when
       // necessary to document things like Symbol#decode
       def isEscaped = idx > 0 && str.charAt(idx - 1) == '\\'
       while (idx < str.length)
-        if ((str charAt idx) != '$' || isEscaped)
-          idx += 1
+        if ((str charAt idx) != '$' || isEscaped) idx += 1
         else {
           val vstart = idx
           idx = skipVariable(str, idx + 1)
@@ -248,7 +288,7 @@ class CommentExpander {
             copied = idx
           }
           variableName(str.substring(vstart + 1, idx)) match {
-            case "super"    =>
+            case "super" =>
               superComment(sym) foreach { sc =>
                 val superSections = tagIndex(sc)
                 replaceWith(sc.substring(3, startTag(sc, superSections)))
@@ -256,11 +296,14 @@ class CommentExpander {
                   if (!isMovable(sc, sec)) out append sc.substring(start, end)
               }
             case "" => idx += 1
-            case vname  =>
+            case vname =>
               lookupVariable(vname, site) match {
                 case Some(replacement) => replaceWith(replacement)
-                case None              => ;
-                  println(s"Variable $vname undefined in comment for $sym in $site")
+                case None              =>
+                    ;
+                  println(
+                    s"Variable $vname undefined in comment for $sym in $site"
+                  )
               }
           }
         }
@@ -280,27 +323,27 @@ class CommentExpander {
     val Trim = "(?s)^[\\s&&[^\n\r]]*(.*?)\\s*$".r
 
     val raw = ctx.docCtx.flatMap(_.docstring(sym).map(_.raw)).getOrElse("")
-    defs(sym) ++= defines(raw).map {
-      str => {
+    defs(sym) ++= defines(raw).map { str =>
+      {
         val start = skipWhitespace(str, "@define".length)
         val (key, value) = str.splitAt(skipVariable(str, start))
         key.drop(start) -> value
       }
-    } map {
-      case (key, Trim(value)) =>
-        variableName(key) -> value.replaceAll("\\s+\\*+$", "")
+    } map { case (key, Trim(value)) =>
+      variableName(key) -> value.replaceAll("\\s+\\*+$", "")
     }
   }
 
   /** Maps symbols to the variable -> replacement maps that are defined
     *  in their doc comments
     */
-  val defs = mutable.HashMap[Symbol, Map[String, String]]() withDefaultValue Map()
+  val defs =
+    mutable.HashMap[Symbol, Map[String, String]]() withDefaultValue Map()
 
   def lookupDefs(sym: Symbol)(using Context): Map[String, String] =
     ctx.docCtx.map(_.docstring(sym) match {
       case Some(cmt) if cmt.isExpanded => cmt.variables
-      case _ => defs(sym)
+      case _                           => defs(sym)
     }) getOrElse Map()
 
   /** Lookup definition of variable.
@@ -308,14 +351,18 @@ class CommentExpander {
     *  @param vble  The variable for which a definition is searched
     *  @param site  The class for which doc comments are generated
     */
-  def lookupVariable(vble: String, site: Symbol)(using Context): Option[String] = site match {
+  def lookupVariable(vble: String, site: Symbol)(using
+      Context
+  ): Option[String] = site match {
     case NoSymbol => None
-    case _        =>
+    case _ =>
       val searchList =
         if (site.flags.is(Flags.Module)) site :: site.info.baseClasses
         else site.info.baseClasses
 
-      searchList collectFirst { case x if lookupDefs(x) contains vble => lookupDefs(x)(vble) } match {
+      searchList collectFirst {
+        case x if lookupDefs(x) contains vble => lookupDefs(x)(vble)
+      } match {
         case Some(str) if str startsWith "$" => lookupVariable(str.tail, site)
         case res                             => res orElse lookupVariable(vble, site.owner)
       }
@@ -332,10 +379,15 @@ class CommentExpander {
     *  an infinite loop has broken out between superComment and cookedDocComment
     *  since r23926.
     */
-  private def allInheritedOverriddenSymbols(sym: Symbol)(using Context): List[Symbol] =
+  private def allInheritedOverriddenSymbols(
+      sym: Symbol
+  )(using Context): List[Symbol] =
     if (!sym.owner.isClass) Nil
-    else sym.allOverriddenSymbols.toList.filter(_ != NoSymbol) //TODO: could also be `sym.owner.allOverrid..`
-    //else sym.owner.ancestors map (sym overriddenSymbol _) filter (_ != NoSymbol)
+    else
+      sym.allOverriddenSymbols.toList.filter(
+        _ != NoSymbol
+      ) //TODO: could also be `sym.owner.allOverrid..`
+  //else sym.owner.ancestors map (sym overriddenSymbol _) filter (_ != NoSymbol)
 
   class ExpansionLimitExceeded(str: String) extends Exception
 }
@@ -352,7 +404,9 @@ object CommentExpander {
       expand(sym, owner)(using ctx)(using docCtx)
     }
 
-  private def expand(sym: Symbol, owner: Symbol)(using Context)(using docCtx: ContextDocstrings): Option[Comment] =
+  private def expand(sym: Symbol, owner: Symbol)(using
+      Context
+  )(using docCtx: ContextDocstrings): Option[Comment] =
     docCtx.docstring(sym).flatMap {
       case cmt if cmt.isExpanded =>
         Some(cmt)
@@ -364,29 +418,38 @@ object CommentExpander {
         }
     }
 
-  private def expandComment(sym: Symbol, owner: Symbol, comment: Comment)(using Context)(using docCtx: ContextDocstrings): Comment = {
+  private def expandComment(sym: Symbol, owner: Symbol, comment: Comment)(using
+      Context
+  )(using docCtx: ContextDocstrings): Comment = {
     val tplExp = new CommentExpander
     tplExp.defineVariables(sym)
     val newComment = {
       val expandedComment = tplExp.expandedDocComment(sym, owner, comment.raw)
-      Comment(comment.span, comment.raw, Some(expandedComment), Nil, tplExp.defs(sym))
+      Comment(
+        comment.span,
+        comment.raw,
+        Some(expandedComment),
+        Nil,
+        tplExp.defs(sym)
+      )
     }
     docCtx.addDocstring(sym, Some(newComment))
     newComment
   }
 
   /** Expands comment of `sym`, but only after expanding all comments necessary to perform that. */
-  private def expandComment(sym: Symbol)(using Context)(using docCtx: ContextDocstrings): Option[Comment] =
+  private def expandComment(sym: Symbol)(using Context)(using
+      docCtx: ContextDocstrings
+  ): Option[Comment] =
     if (sym eq NoSymbol) None
-    else docCtx.docstring(sym) match
-      case Some(cmt) if !cmt.isExpanded =>
-        expandComment(sym.owner)
-        if sym.isClass then
-          for ptype <- sym.info.parents do
-            expandComment(ptype.classSymbol)
-        Some(expandComment(sym, sym.owner, cmt))
-      case _ =>
-        None
+    else
+      docCtx.docstring(sym) match
+        case Some(cmt) if !cmt.isExpanded =>
+          expandComment(sym.owner)
+          if sym.isClass then
+            for ptype <- sym.info.parents do expandComment(ptype.classSymbol)
+          Some(expandComment(sym, sym.owner, cmt))
+        case _ =>
+          None
     end if
 }
-

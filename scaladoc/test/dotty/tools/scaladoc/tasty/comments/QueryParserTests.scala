@@ -9,12 +9,15 @@ class QueryParserTests {
     import Query._
 
     def l2q(shorthand: ((String | Qual), Char)*)(last: String): QuerySegment = {
-      if shorthand.isEmpty then Query.Id(last) else {
+      if shorthand.isEmpty then Query.Id(last)
+      else {
         val head = shorthand.head
         val tail = shorthand.tail
         head match {
-          case ((id: String), ch) => Query.QualifiedId(Query.Qual.Id(id), ch, l2q(tail : _*)(last))
-          case ((qual: Qual), ch) => Query.QualifiedId(qual, ch, l2q(tail : _*)(last))
+          case ((id: String), ch) =>
+            Query.QualifiedId(Query.Qual.Id(id), ch, l2q(tail: _*)(last))
+          case ((qual: Qual), ch) =>
+            Query.QualifiedId(qual, ch, l2q(tail: _*)(last))
         }
       }
     }
@@ -45,8 +48,14 @@ class QueryParserTests {
     testSuccess("a\\#b", Id("a#b"))
     testSuccess("ab\\ ", Id("ab "))
 
-    testSuccess("#foo\\(ignoredOverloadDefinition*", StrictMemberId("foo(ignoredOverloadDefinition*"))
-    testSuccess("#bar\\[ignoredOverloadDefinition*", StrictMemberId("bar[ignoredOverloadDefinition*"))
+    testSuccess(
+      "#foo\\(ignoredOverloadDefinition*",
+      StrictMemberId("foo(ignoredOverloadDefinition*")
+    )
+    testSuccess(
+      "#bar\\[ignoredOverloadDefinition*",
+      StrictMemberId("bar[ignoredOverloadDefinition*")
+    )
 
     testFailAt("#", 1)
     testFailAt("#`", 2)

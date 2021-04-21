@@ -27,4 +27,5 @@ class SealedHierarchyTest extends ScaladocTest("sealedClasses"):
         Set("A", "B1", "C1"),
         x.graph.sealedNodes.map(_.signature.getName)
       )
-    case _ =>
+    case _
+      =>

@@ -14,8 +14,8 @@ trait Scaladoc2AnchorCreator:
 
   def getScaladoc2Type(t: Tree) = {
     (t match {
-    case d: DefDef => d.show.split("def", 2)(1)
-    case t: TypeDef => t.show.split("type", 2)(1)
-    case v: ValDef => v.show.split("val|var", 2)(1)
-  }).replace(" ","")
-}
+      case d: DefDef  => d.show.split("def", 2)(1)
+      case t: TypeDef => t.show.split("type", 2)(1)
+      case v: ValDef  => v.show.split("val|var", 2)(1)
+    }).replace(" ", "")
+  }

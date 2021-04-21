@@ -21,8 +21,7 @@ object TestUtils {
         val bld = new ListBuffer[String]
         go(bld)(classRoot)
         bld.result
-      else
-        sys.error(s"Class root could not be found: $classRoot")
+      else sys.error(s"Class root could not be found: $classRoot")
 
     val files = BuildInfo.test_testcasesOutputDir.flatMap(listEntry).toList
     assert(files.nonEmpty, "Provided list of root directories is empty")

@@ -12,26 +12,26 @@ class CommentExpanderTests {
   def check(using quoted.Quotes)(): Unit =
     assertCommentEquals(
       qr.Symbol.requiredClass("tests.B").memberMethod("otherMethod").head,
-      "/** This is my foo: Bar, actually. */",
+      "/** This is my foo: Bar, actually. */"
     )
     assertCommentEquals(
       qr.Symbol.requiredClass("tests.C"),
-      "/** This is foo: Foo expanded. */",
+      "/** This is foo: Foo expanded. */"
     )
     assertCommentEquals(
       qr.Symbol.requiredModule("tests.O").memberMethod("method").head,
-      "/** This is foo: O's foo. */",
+      "/** This is foo: O's foo. */"
     )
 
-
-  def assertCommentEquals(
-    using quoted.Quotes
+  def assertCommentEquals(using
+      quoted.Quotes
   )(
-    rsym: quotes.reflect.Symbol,
-    str: String
+      rsym: quotes.reflect.Symbol,
+      str: String
   ): Unit =
     import dotty.tools.dotc
-    given ctx: dotc.core.Contexts.Context = quotes.asInstanceOf[scala.quoted.runtime.impl.QuotesImpl].ctx
+    given ctx: dotc.core.Contexts.Context =
+      quotes.asInstanceOf[scala.quoted.runtime.impl.QuotesImpl].ctx
     val sym = rsym.asInstanceOf[dotc.core.Symbols.Symbol]
     val comment = CommentExpander.cookComment(sym).get
     assertEquals(comment.expanded.get, str)
@@ -41,7 +41,9 @@ class CommentExpanderTests {
     import scala.tasty.inspector.OldTastyInspector
     class Inspector extends OldTastyInspector:
 
-      def processCompilationUnit(using quoted.Quotes)(root: quotes.reflect.Tree): Unit = ()
+      def processCompilationUnit(using quoted.Quotes)(
+          root: quotes.reflect.Tree
+      ): Unit = ()
 
       override def postProcess(using quoted.Quotes): Unit =
         check()
