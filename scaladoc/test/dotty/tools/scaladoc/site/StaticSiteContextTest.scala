@@ -7,7 +7,7 @@ import org.junit.Assert._
 // TODO add negaitve and more details tests
 class SidebarParserTest:
 
-  private val sidebar = """sidebar:
+   private val sidebar = """sidebar:
     - title: Blog
       url: blog/index.html
     - title: Reference
@@ -22,6 +22,6 @@ class SidebarParserTest:
               url: docs/reference/new-types/union-types.html
  """
 
-  @Test
-  def loadSidebar(): Unit =
-    assertEquals(2, Sidebar.load(sidebar).size)
+   @Test
+   def loadSidebar(): Unit =
+      assertEquals(2, Sidebar.load(sidebar).size)
