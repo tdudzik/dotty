@@ -136,5 +136,4 @@ class HierarchyTest extends ScaladocTest("hierarchy"):
           .map((a, b) => (a.signature.getName, b.signature.getName))
           .toSet
       )
-    case _
-      =>
+    case _ =>

@@ -70,7 +70,7 @@ case class TemplateFile(
         name,
         throw new RuntimeException(s"No layouts named $name in ${ctx.layouts}")
       )
-      )
+    )
 
     def asJavaElement(o: Object): Object = o match
       case m: Map[_, _] =>

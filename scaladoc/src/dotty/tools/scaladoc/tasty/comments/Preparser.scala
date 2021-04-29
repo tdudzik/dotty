@@ -269,9 +269,10 @@ object Preparser {
   }
 
   private case class SimpleTagKey(name: String) extends TagKey
-  private case class SymbolTagKey(name: String, symbol: String) extends TagKey
+  private case class SymbolTagKey(name: String, symbol: String)
+      extends TagKey
 
-  /** Something that should not have happened, happened, and Scaladoc should exit. */
+      /** Something that should not have happened, happened, and Scaladoc should exit. */
   private def oops(msg: String): Nothing =
     throw new IllegalArgumentException("program logic: " + msg)
 }

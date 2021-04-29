@@ -50,9 +50,10 @@ final case class Code(data: String) extends Block
 final case class UnorderedList(items: Seq[Block]) extends Block
 final case class OrderedList(items: Seq[Block], style: String) extends Block
 final case class DefinitionList(items: SortedMap[Inline, Block]) extends Block
-object HorizontalRule extends Block
+object HorizontalRule
+    extends Block
 
-/** An section of text inside a block, possibly with formatting. */
+    /** An section of text inside a block, possibly with formatting. */
 sealed abstract class Inline extends WikiDocElement:
   def isEmpty = this match
     case Chain(items) if items.isEmpty => true

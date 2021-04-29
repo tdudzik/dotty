@@ -133,6 +133,6 @@ trait SignatureBuilder extends ScalaSignatureUtils {
 }
 
 trait ScalaSignatureUtils:
-  extension(tokens: Seq[String])
+  extension (tokens: Seq[String])
     def toSignatureString(): String =
       tokens.filter(_.trim.nonEmpty).mkString("", " ", " ")

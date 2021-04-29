@@ -28,8 +28,7 @@ class AbstractMembers extends ScaladocTest("abstractmembersignatures"):
                 m.contains("abstract") == n.contains("Abstract")
               )
             )
-          case _
-            =>
+          case _ =>
       }
     }
   }
