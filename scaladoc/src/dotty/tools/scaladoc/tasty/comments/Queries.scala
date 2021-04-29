@@ -3,8 +3,8 @@ package tasty.comments
 
 sealed trait Query {
   def asList: List[String] = this match {
-    case Query.StrictMemberId(id) => id :: Nil
-    case Query.Id(id) => id :: Nil
+    case Query.StrictMemberId(id)         => id :: Nil
+    case Query.Id(id)                     => id :: Nil
     case Query.QualifiedId(qual, _, rest) => qual.asString :: rest.asList
   }
 
@@ -28,7 +28,8 @@ sealed trait QuerySegment extends Query
 object Query {
   case class StrictMemberId(id: String) extends Query
   case class Id(id: String) extends QuerySegment
-  case class QualifiedId(id: Qual, sep: Char, rest: QuerySegment) extends QuerySegment
+  case class QualifiedId(id: Qual, sep: Char, rest: QuerySegment)
+      extends QuerySegment
 
   enum Qual {
     case Id(id: String)
@@ -36,9 +37,9 @@ object Query {
     case Package
 
     def asString: String = this match {
-      case Qual.This => "this"
+      case Qual.This    => "this"
       case Qual.Package => "package"
-      case Qual.Id(id) => id
+      case Qual.Id(id)  => id
     }
   }
 }
@@ -48,8 +49,9 @@ class QueryParser(val query: CharSequence) {
   private var bld: StringBuilder = StringBuilder()
 
   def tryReadQuery(): Either[QueryParseException, Query] =
-    try Right(readQuery()) catch {
-      case ex : QueryParseException => Left(ex)
+    try Right(readQuery())
+    catch {
+      case ex: QueryParseException => Left(ex)
     }
 
   def readQuery(): Query = {
@@ -67,8 +69,8 @@ class QueryParser(val query: CharSequence) {
       Query.Id(id.asString)
     } else {
       val ch = popCh()
-      if ch == '.' || ch == '#'
-      then Query.QualifiedId(id, ch, readSegmentedQuery())
+      if ch == '.' || ch == '#' then
+        Query.QualifiedId(id, ch, readSegmentedQuery())
       else err(s"expected . or #, instead saw: '$ch'")
     }
   }
@@ -98,9 +100,10 @@ class QueryParser(val query: CharSequence) {
         // NOTE: backquotes intentionally cannot be backslash-escaped, as they
         // cannot be used in Scala identifiers
         if lookingAt('`') then err("backquotes are not allowed in identifiers")
-        if escaped then false else
+        if escaped then false
+        else
           lookingAt('#') || lookingAt('.')
-            || lookingAt('(') || lookingAt('[')
+          || lookingAt('(') || lookingAt('[')
       }
     }
 
@@ -108,9 +111,9 @@ class QueryParser(val query: CharSequence) {
     val res = popRes()
     if res.isEmpty then err("empty identifier")
     res match {
-      case "this" => Query.Qual.This
+      case "this"    => Query.Qual.This
       case "package" => Query.Qual.Package
-      case res => Query.Qual.Id(res)
+      case res       => Query.Qual.Id(res)
     }
   }
 
@@ -153,8 +156,8 @@ class QueryParser(val query: CharSequence) {
     throw new QueryParseException(query, idx, problem)
 
   class QueryParseException(
-    val query: CharSequence,
-    val at: Int,
-    val problem: String
+      val query: CharSequence,
+      val at: Int,
+      val problem: String
   ) extends Exception(s"$problem at char $at in query: $query")
 }

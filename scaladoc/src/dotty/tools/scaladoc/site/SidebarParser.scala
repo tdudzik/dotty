@@ -13,7 +13,11 @@ enum Sidebar:
   case Page(title: String, url: String)
 
 object Sidebar:
-  case class RawInput(var title: String,var url: String, var subsection: JList[RawInput]):
+  case class RawInput(
+      var title: String,
+      var url: String,
+      var subsection: JList[RawInput]
+  ):
     def this() = this("", "", JList())
 
     def setTitle(t: String) = this.title = t
@@ -24,9 +28,11 @@ object Sidebar:
   private object RawTypeRef extends TypeReference[RawInnerTpe]
 
   private def toSidebar(r: RawInput): Sidebar = r match
-    case RawInput(title, url, list) if title.nonEmpty && url.nonEmpty && list.isEmpty() =>
+    case RawInput(title, url, list)
+        if title.nonEmpty && url.nonEmpty && list.isEmpty() =>
       Sidebar.Page(title, url)
-    case RawInput(title, url, list) if title.nonEmpty && url.isEmpty && !list.isEmpty() =>
+    case RawInput(title, url, list)
+        if title.nonEmpty && url.isEmpty && !list.isEmpty() =>
       Sidebar.Category(title, list.asScala.map(toSidebar).toList)
 
   def load(content: String): Seq[Sidebar] =

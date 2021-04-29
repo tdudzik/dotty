@@ -32,9 +32,9 @@ enum DocLink:
 type DocPart = Seq[WikiDocElement] | MdNode
 
 extension [V](jlist: JList[V])
-  def ++ (other: JList[V]): JList[V] =
+  def ++(other: JList[V]): JList[V] =
     Stream.of(jlist, other).flatMap(_.stream).collect(Collectors.toList())
 
 extension [V](jset: JSet[V])
-  def ++ (other: JSet[V]): JSet[V] =
+  def ++(other: JSet[V]): JSet[V] =
     Stream.of(jset, other).flatMap(_.stream).collect(Collectors.toSet())

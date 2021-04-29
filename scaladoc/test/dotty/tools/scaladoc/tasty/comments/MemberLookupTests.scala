@@ -27,26 +27,21 @@ class LookupTestCases[Q <: Quotes](val q: Quotes) {
       "Array$.from" -> cls("scala.Array$").fun("from"),
       "???" -> cls("scala.Predef$").fun("???"),
       "scala.List" -> cls("scala.package$").tpe("List"),
-
       "scala.List.lift" -> cls("scala.PartialFunction").fun("lift"),
-
       "tests.A" -> cls("tests.A"),
       "tests.A$" -> cls("tests.A$"),
       "tests.Methods.simple" -> cls("tests.Methods").fun("simple"),
       "tests.foo" -> cls("tests.package$").fld("foo"),
       "tests.bar" -> cls("tests.tests$package$").fld("bar"),
-
       "java.util.AbstractCollection" -> cls("java.util.AbstractCollection"),
       "java.lang.String" -> cls("java.lang.String"),
       "java.util.Formatter" -> cls("java.util.Formatter"),
       "java.io.Flushable" -> cls("java.io.Flushable"),
       "java.util.List" -> cls("java.util.List"),
-
       "tests.lookupInheritedMembers.pack1.A.x" ->
         cls("tests.lookupInheritedMembers.pack1.A").fun("x"),
-
       "tests.lookupInheritedMembers.pack2.B.x" ->
-        cls("tests.lookupInheritedMembers.pack1.A").fun("x"),
+        cls("tests.lookupInheritedMembers.pack1.A").fun("x")
     )
 
     cases.foreach { case (query, sym) =>
@@ -64,55 +59,48 @@ class LookupTestCases[Q <: Quotes](val q: Quotes) {
 
   def testOwnedLookup(): Unit = {
     val cases = List[((Sym, String), Sym)](
-      cls("tests.A") -> "tests.Methods.simple" -> cls("tests.Methods").fun("simple"),
-      cls("tests.A") -> "tests#Methods#simple" -> cls("tests.Methods").fun("simple"),
-
+      cls("tests.A") -> "tests.Methods.simple" -> cls("tests.Methods").fun(
+        "simple"
+      ),
+      cls("tests.A") -> "tests#Methods#simple" -> cls("tests.Methods").fun(
+        "simple"
+      ),
       cls("tests.A") -> "method" -> cls("tests.A").fun("method"),
       cls("tests.A") -> "#method" -> cls("tests.A").fun("method"),
       cls("tests.A") -> "method*" -> cls("tests.A").fun("method"),
       cls("tests.A") -> "method[T]*" -> cls("tests.A").fun("method"),
       cls("tests.A") -> "method(str:String*" -> cls("tests.A").fun("method"),
-
       cls("tests.A") -> "tests.B" -> cls("tests.B"),
       cls("tests.A") -> "tests.B$" -> cls("tests.B$"),
-
       cls("tests.A") -> "AA" -> cls("tests.A").tpe("AA"),
       cls("tests.A") -> "#AA" -> cls("tests.A").tpe("AA"),
       cls("tests.A") -> "AA!" -> cls("tests.A").tpe("AA"),
       cls("tests.A") -> "AA$" -> cls("tests.A").fld("AA"),
-
       cls("tests.C") -> "CC" -> cls("tests.C").tpe("CC"),
       cls("tests.C") -> "CC$" -> cls("tests.C").fld("CC"),
       cls("tests.C") -> "CC!" -> cls("tests.C").tpe("CC"),
-
       cls("tests.A").fun("method") -> "AA" -> cls("tests.A").tpe("AA"),
       cls("tests.A").fun("method") -> "AA!" -> cls("tests.A").tpe("AA"),
       cls("tests.A").fun("method") -> "AA$" -> cls("tests.A").fld("AA"),
-
-      cls("tests.Methods").fun("simple") -> "generic" -> cls("tests.Methods").fun("generic"),
-      cls("tests.Methods").fun("simple") -> "#generic" -> cls("tests.Methods").fun("generic"),
-
+      cls("tests.Methods").fun("simple") -> "generic" -> cls("tests.Methods")
+        .fun("generic"),
+      cls("tests.Methods").fun("simple") -> "#generic" -> cls("tests.Methods")
+        .fun("generic"),
       cls("tests.A").fun("method") -> "B" -> cls("tests.B"),
       cls("tests.A").fun("method") -> "B$" -> cls("tests.B$"),
-
       cls("tests.A") -> "B.method" -> cls("tests.B").fun("method"),
       cls("tests.A") -> "Option" -> cls("scala.Option"),
-
       /*sanity*/ cls("tests.A") -> "this.X" -> cls("tests.A").tpe("X"),
       /*sanity*/ cls("tests.A") -> "this.Y" -> cls("tests.A").tpe("Y"),
       cls("tests.A") -> "this.X.method" -> cls("tests.B").fun("method"),
       cls("tests.A") -> "this.Y.method" -> cls("tests.B").fun("method"),
-
       cls("tests.A") -> "A.foo" -> cls("tests.A$").fun("foo"),
-
       cls("tests.inner.B") -> "A" -> cls("tests.inner.A$"),
-
       cls("tests.B$") -> "foo" -> cls("tests.BModule").fun("foo"),
-
       cls("tests.D") -> "foo" -> cls("tests.package$").fld("foo"),
       cls("tests.D") -> "bar" -> cls("tests.tests$package$").fld("bar"),
       cls("tests.inner.A$") -> "foo" -> cls("tests.package$").fld("foo"),
-      cls("tests.inner.A$") -> "bar" -> cls("tests.tests$package$").fld("bar"),
+      cls("tests.inner.A$") -> "bar" -> cls("tests.tests$package$").fld("bar")
     )
 
     cases.foreach { case ((Sym(owner), query), Sym(target)) =>
@@ -125,7 +113,10 @@ class LookupTestCases[Q <: Quotes](val q: Quotes) {
     val owner = cls("tests.A").symbol
     val query = "#A"
 
-    assertTrue("strict member lookup should not look outside", MemberLookup.lookup(parseQuery(query), owner).isEmpty)
+    assertTrue(
+      "strict member lookup should not look outside",
+      MemberLookup.lookup(parseQuery(query), owner).isEmpty
+    )
   }
 
   given q.type = q
@@ -157,7 +148,9 @@ class MemberLookupTests {
     class Inspector extends OldTastyInspector:
       var alreadyRan: Boolean = false
 
-      override def processCompilationUnit(using ctx: quoted.Quotes)(root: ctx.reflect.Tree): Unit =
+      override def processCompilationUnit(using
+          ctx: quoted.Quotes
+      )(root: ctx.reflect.Tree): Unit =
         if !alreadyRan then
           this.test()
           alreadyRan = true

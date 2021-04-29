@@ -14,20 +14,21 @@ class ReportingTest:
   import Scaladoc.Args
 
   private def checkReportedDiagnostics(
-    newArgs: Args => Args = identity,
-    ctx: CompilerContext = testContext)(
-    op: ReportedDiagnostics => Unit): Unit =
+      newArgs: Args => Args = identity,
+      ctx: CompilerContext = testContext
+  )(op: ReportedDiagnostics => Unit): Unit =
 
     val dest = Files.createTempDirectory("test-doc")
     try
       // We are using random package
-      Scaladoc.run(newArgs(testArgs(tastyFiles("nested"), dest.toFile)))(using ctx)
+      Scaladoc
+        .run(newArgs(testArgs(tastyFiles("nested"), dest.toFile)))(using ctx)
       op(ctx.reportedDiagnostics)
 
     finally IO.delete(dest.toFile)
 
   @Test
-  def noMessageForMostCases = checkReportedDiagnostics(){ diag =>
+  def noMessageForMostCases = checkReportedDiagnostics() { diag =>
     assertNoWarning(diag)
     assertNoErrors(diag)
     assertNoInfos(diag)
@@ -38,8 +39,12 @@ class ReportingTest:
     val notTasty = Files.createTempFile("broken", ".notTasty")
     try
       Files.write(notTasty, "Random file".getBytes)
-      checkReportedDiagnostics(a => a.copy(tastyFiles = notTasty.toFile +: a.tastyFiles)){ diag =>
-        assertMessagesAbout(diag.errorMsgs)("File extension is not `tasty` or `jar`")
+      checkReportedDiagnostics(a =>
+        a.copy(tastyFiles = notTasty.toFile +: a.tastyFiles)
+      ) { diag =>
+        assertMessagesAbout(diag.errorMsgs)(
+          "File extension is not `tasty` or `jar`"
+        )
       }
     finally Files.delete(notTasty)
 
@@ -47,7 +52,7 @@ class ReportingTest:
   def verbosePrintsDokkaMessage =
     val ctx = testContext
     ctx.setSetting(ctx.settings.verbose, true)
-    checkReportedDiagnostics(ctx = ctx){ diag =>
+    checkReportedDiagnostics(ctx = ctx) { diag =>
       assertNoWarning(diag)
       assertNoErrors(diag)
 

@@ -6,13 +6,16 @@ import scala.collection.mutable
 import dotty.tools.scaladoc.tasty.comments.Regexes._
 
 /** Original wikiparser from NSC
-  * @author Ingo Maier
-  * @author Manohar Jonnalagedda
-  * @author Gilles Dubochet
+  * @author
+  *   Ingo Maier
+  * @author
+  *   Manohar Jonnalagedda
+  * @author
+  *   Gilles Dubochet
   */
 final class Parser(
-  val buffer: String,
-  linkResolver: (String, Option[Inline]) => Inline
+    val buffer: String,
+    linkResolver: (String, Option[Inline]) => Inline
 ) extends CharReader(buffer) { wiki =>
   var summaryParsed = false
 
@@ -40,33 +43,40 @@ final class Parser(
     }
   }
 
-  /** listStyle ::= '-' spc | '1.' spc | 'I.' spc | 'i.' spc | 'A.' spc | 'a.' spc
-    * Characters used to build lists and their constructors */
+  /** listStyle ::= '-' spc | '1.' spc | 'I.' spc | 'i.' spc | 'A.' spc | 'a.'
+    * spc Characters used to build lists and their constructors
+    */
   protected val listStyles = Map[String, (Seq[Block] => Block)](
-    "- "  -> ( UnorderedList(_) ),
-    "1. " -> ( OrderedList(_,"decimal") ),
-    "I. " -> ( OrderedList(_,"upperRoman") ),
-    "i. " -> ( OrderedList(_,"lowerRoman") ),
-    "A. " -> ( OrderedList(_,"upperAlpha") ),
-    "a. " -> ( OrderedList(_,"lowerAlpha") )
+    "- " -> (UnorderedList(_)),
+    "1. " -> (OrderedList(_, "decimal")),
+    "I. " -> (OrderedList(_, "upperRoman")),
+    "i. " -> (OrderedList(_, "lowerRoman")),
+    "A. " -> (OrderedList(_, "upperAlpha")),
+    "a. " -> (OrderedList(_, "lowerAlpha"))
   )
 
-  /** Checks if the current line is formed with more than one space and one the listStyles */
+  /** Checks if the current line is formed with more than one space and one the
+    * listStyles
+    */
   def checkList =
-    (countWhitespace > 0) && (listStyles.keys exists { checkSkipInitWhitespace(_) })
+    (countWhitespace > 0) && (listStyles.keys exists {
+      checkSkipInitWhitespace(_)
+    })
 
   /** {{{
     * nListBlock ::= nLine { mListBlock }
-    *      nLine ::= nSpc listStyle para '\n'
+    *     nLine ::= nSpc listStyle para '\n'
     * }}}
-    * Where n and m stand for the number of spaces. When `m > n`, a new list is nested. */
+    * Where n and m stand for the number of spaces. When `m > n`, a new list is
+    * nested.
+    */
   def listBlock(): Block = {
 
-    /** Consumes one list item block and returns it, or None if the block is
-      * not a list or a different list. */
+    /** Consumes one list item block and returns it, or None if the block is not
+      * a list or a different list.
+      */
     def listLine(indent: Int, style: String): Option[Block] =
-      if (countWhitespace > indent && checkList)
-        Some(listBlock())
+      if (countWhitespace > indent && checkList) Some(listBlock())
       else if (countWhitespace != indent || !checkSkipInitWhitespace(style))
         None
       else {
@@ -77,8 +87,9 @@ final class Parser(
         Some(p)
       }
 
-    /** Consumes all list item blocks (possibly with nested lists) of the
-      * same list and returns the list block. */
+    /** Consumes all list item blocks (possibly with nested lists) of the same
+      * list and returns the list block.
+      */
     def listLevel(indent: Int, style: String): Block = {
       val lines = mutable.ListBuffer.empty[Block]
       var line: Option[Block] = listLine(indent, style)
@@ -91,7 +102,8 @@ final class Parser(
     }
 
     val indent = countWhitespace
-    val style = (listStyles.keys find { checkSkipInitWhitespace(_) }).getOrElse(listStyles.keys.head)
+    val style = (listStyles.keys find { checkSkipInitWhitespace(_) })
+      .getOrElse(listStyles.keys.head)
     listLevel(indent, style)
   }
 
@@ -130,12 +142,12 @@ final class Parser(
   /** {{{ para ::= inline '\n' }}} */
   def para(): Block = {
     val p =
-      if (summaryParsed)
-        Paragraph(getInline(isInlineEnd = false))
+      if (summaryParsed) Paragraph(getInline(isInlineEnd = false))
       else {
         val s = summary()
         val r =
-          if (checkParaEnded()) List(s) else List(s, getInline(isInlineEnd = false))
+          if (checkParaEnded()) List(s)
+          else List(s, getInline(isInlineEnd = false))
         summaryParsed = true
         Paragraph(Chain(r))
       }
@@ -173,7 +185,7 @@ final class Parser(
         }
         case CLOSE_TAG(s) => {
           if (s == stack.last) {
-            stack.remove(stack.length-1)
+            stack.remove(stack.length - 1)
           }
         }
         case _ => ;
@@ -191,25 +203,24 @@ final class Parser(
       if (char == safeTagMarker) {
         val tag = htmlTag()
         HtmlTag(tag.data + readHTMLFrom(tag))
-      }
-      else if (check("'''")) bold()
+      } else if (check("'''")) bold()
       else if (check("''")) italic()
-      else if (check("`"))  monospace()
+      else if (check("`")) monospace()
       else if (check("__")) underline()
-      else if (check("^"))  superscript()
+      else if (check("^")) superscript()
       else if (check(",,")) subscript()
       else if (check("[[")) link()
       else {
         val str = readUntil {
           char == safeTagMarker ||
-          check("''")           ||
-          char == '`'           ||
-          check("__")           ||
-          char == '^'           ||
-          check(",,")           ||
-          check("[[")           ||
-          isInlineEnd           ||
-          checkParaEnded()      ||
+          check("''") ||
+          char == '`' ||
+          check("__") ||
+          char == '^' ||
+          check(",,") ||
+          check("[[") ||
+          isInlineEnd ||
+          checkParaEnded() ||
           char == endOfLine
         }
         Text(str)
@@ -240,9 +251,9 @@ final class Parser(
     }
 
     inlines match {
-      case Nil => Text("")
+      case Nil      => Text("")
       case i :: Nil => i
-      case is => Chain(is)
+      case is       => Chain(is)
     }
 
   }
@@ -312,7 +323,7 @@ final class Parser(
   def link(): Inline = {
     jump("[[")
     val parens = 2 + repeatJump('[')
-    val stop  = "]" * parens
+    val stop = "]" * parens
     val target = readUntil { check(stop) || isWhitespaceOrNewLine(char) }
     val title =
       if (!check(stop)) Some({
@@ -337,28 +348,34 @@ final class Parser(
       nextChar()
   }
 
-  /**
-   *  Eliminates the (common) leading spaces in all lines, based on the first line
-   *  For indented pieces of code, it reduces the indent to the least whitespace prefix:
-   *    {{{
-   *       indented example
-   *       another indented line
-   *       if (condition)
-   *         then do something;
-   *       ^ this is the least whitespace prefix
-   *    }}}
-   */
+  /** Eliminates the (common) leading spaces in all lines, based on the first
+    * line For indented pieces of code, it reduces the indent to the least
+    * whitespace prefix:
+    * {{{
+    *       indented example
+    *       another indented line
+    *       if (condition)
+    *         then do something;
+    *       ^ this is the least whitespace prefix
+    * }}}
+    */
   def normalizeIndentation(_code: String): String = {
 
-    val code = _code.replaceAll("\\s+$", "").dropWhile(_ == '\n') // right-trim + remove all leading '\n'
+    val code = _code
+      .replaceAll("\\s+$", "")
+      .dropWhile(_ == '\n') // right-trim + remove all leading '\n'
     val lines = code.split("\n")
 
     // maxSkip - size of the longest common whitespace prefix of non-empty lines
     val nonEmptyLines = lines.filter(_.trim.nonEmpty)
-    val maxSkip = if (nonEmptyLines.isEmpty) 0 else nonEmptyLines.map(line => line.iterator.takeWhile(_ == ' ').size).min
+    val maxSkip =
+      if (nonEmptyLines.isEmpty) 0
+      else nonEmptyLines.map(line => line.iterator.takeWhile(_ == ' ').size).min
 
     // remove common whitespace prefix
-    lines.map(line => if (line.trim.nonEmpty) line.substring(maxSkip) else line).mkString("\n")
+    lines
+      .map(line => if (line.trim.nonEmpty) line.substring(maxSkip) else line)
+      .mkString("\n")
   }
 
   def checkParaEnded(): Boolean = {
@@ -442,21 +459,25 @@ sealed class CharReader(buffer: String) { reader =>
   /* Jumpers */
 
   /** Jumps a character and consumes it
-    * @return true only if the correct character has been jumped */
+    * @return
+    *   true only if the correct character has been jumped
+    */
   final def jump(ch: Char): Boolean = {
     if (char == ch) {
       nextChar()
       true
-    }
-    else false
+    } else false
   }
 
   /** Jumps all the characters in chars, consuming them in the process.
-    * @return true only if the correct characters have been jumped
+    * @return
+    *   true only if the correct characters have been jumped
     */
   final def jump(chars: String): Boolean = {
     var index = 0
-    while (index < chars.length && char == chars.charAt(index) && char != endOfText) {
+    while (
+      index < chars.length && char == chars.charAt(index) && char != endOfText
+    ) {
       nextChar()
       index += 1
     }

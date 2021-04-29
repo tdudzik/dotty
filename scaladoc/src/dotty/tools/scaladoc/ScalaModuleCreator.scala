@@ -11,12 +11,20 @@ object ScalaModuleProvider:
     val (result, rootDoc) = ScaladocTastyInspector().result()
     val (rootPck, rest) = result.partition(_.name == "API")
     val packageMembers = (rest ++ rootPck.flatMap(_.members))
-      .filter(p => p.members.nonEmpty || p.docs.nonEmpty).sortBy(_.name)
+      .filter(p => p.members.nonEmpty || p.docs.nonEmpty)
+      .sortBy(_.name)
 
-    def flattenMember(m: Member): Seq[(DRI, Member)] = (m.dri -> m) +: m.members.flatMap(flattenMember)
+    def flattenMember(m: Member): Seq[(DRI, Member)] =
+      (m.dri -> m) +: m.members.flatMap(flattenMember)
 
     val topLevelPackage =
-      Member("API", site.apiPageDRI, Kind.RootPackage, members = packageMembers, docs = rootDoc)
+      Member(
+        "API",
+        site.apiPageDRI,
+        Kind.RootPackage,
+        members = packageMembers,
+        docs = rootDoc
+      )
 
     val original = Module(topLevelPackage, flattenMember(topLevelPackage).toMap)
 
@@ -25,4 +33,6 @@ object ScalaModuleProvider:
       InheritanceInformationTransformer(),
       SealedMarksGraphTransformer()
     )
-    transformers.foldLeft(original)((module, transformer) => transformer.apply(module))
+    transformers.foldLeft(original)((module, transformer) =>
+      transformer.apply(module)
+    )

@@ -10,6 +10,9 @@ class DocFlexmarkParserTests {
     assertEquals(("a", "b c d"), DocFlexmarkParser.splitWikiLink("a b c d"))
     assertEquals(("a", "b\\ c d"), DocFlexmarkParser.splitWikiLink("a b\\ c d"))
     assertEquals(("a\\ b", "c d"), DocFlexmarkParser.splitWikiLink("a\\ b c d"))
-    assertEquals(("a\\\\", "b c d"), DocFlexmarkParser.splitWikiLink("a\\\\ b c d"))
+    assertEquals(
+      ("a\\\\", "b c d"),
+      DocFlexmarkParser.splitWikiLink("a\\\\ b c d")
+    )
   }
 }

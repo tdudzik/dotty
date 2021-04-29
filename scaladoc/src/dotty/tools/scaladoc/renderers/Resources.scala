@@ -24,32 +24,45 @@ enum Resource(val path: String):
 
 trait Resources(using ctx: DocContext) extends Locations, Writer:
   private def dynamicJsData =
-    val str = jsonObject("filterDefaults" -> jsonObject(
-      FilterAttributes.defaultValues.toSeq.map { case  (n, v) => n -> jsonString(v) }:_*
-    ))
+    val str = jsonObject(
+      "filterDefaults" -> jsonObject(
+        FilterAttributes.defaultValues.toSeq.map { case (n, v) =>
+          n -> jsonString(v)
+        }: _*
+      )
+    )
     Resource.Text("scripts/data.js", s"var scaladocData = $str")
 
-  private def scaladocVersionFile = Resource.Text("scaladoc.version", BuildInfo.version)
+  private def scaladocVersionFile =
+    Resource.Text("scaladoc.version", BuildInfo.version)
 
   private def projectLogo = ctx.args.projectLogo.toSeq.map { p =>
-      val path = Paths.get(p)
-      Resource.File(s"project-logo/${path.getFileName()}", path)
+    val path = Paths.get(p)
+    Resource.File(s"project-logo/${path.getFileName()}", path)
   }
 
-  private def dottyRes(path: String) = Resource.Classpath(path, s"dotty_res/$path")
+  private def dottyRes(path: String) =
+    Resource.Classpath(path, s"dotty_res/$path")
 
-  def linkResources(dri: DRI, resources: Iterable[String]): Iterable[AppliedTag] =
+  def linkResources(
+      dri: DRI,
+      resources: Iterable[String]
+  ): Iterable[AppliedTag] =
     def fileExtension(url: String): String =
       val param = url.indexOf('?')
       val end = if param < 0 then url.length else param
       val point = url.lastIndexOf('.', end)
-      url.substring(point+1, end)
+      url.substring(point + 1, end)
 
-    for res <- resources yield
-      fileExtension(res) match
-        case "css" => link(rel := "stylesheet", href := resolveLink(dri, res))
-        case "js" => script(`type` := "text/javascript", src := resolveLink(dri, res), defer := "true")
-        case _ => raw("")
+    for res <- resources yield fileExtension(res) match
+      case "css" => link(rel := "stylesheet", href := resolveLink(dri, res))
+      case "js" =>
+        script(
+          `type` := "text/javascript",
+          src := resolveLink(dri, res),
+          defer := "true"
+        )
+      case _ => raw("")
 
   val memberResources: Seq[Resource] =
     val fromResources = List(
@@ -78,23 +91,26 @@ trait Resources(using ctx: DocContext) extends Locations, Writer:
       "https://code.jquery.com/jquery-3.5.1.min.js",
       "https://d3js.org/d3.v6.min.js",
       "https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js"
     ).map(Resource.URL.apply)
 
-    fromResources ++ urls ++ projectLogo ++ Seq(scaladocVersionFile, dynamicJsData)
+    fromResources ++ urls ++ projectLogo ++ Seq(
+      scaladocVersionFile,
+      dynamicJsData
+    )
 
   val searchDataPath = "scripts/searchData.js"
   val memberResourcesPaths = Seq(searchDataPath) ++ memberResources.map(_.path)
-
 
   def searchData(pages: Seq[Page]) =
     def flattenToText(signature: Signature): String =
       signature.map {
         case Link(name, dri) => name
-        case s: String => s
+        case s: String       => s
       }.mkString
 
-    def mkEntry(dri: DRI, name: String, text: String, descr: String) = jsonObject(
+    def mkEntry(dri: DRI, name: String, text: String, descr: String) =
+      jsonObject(
         "l" -> jsonString(absolutePath(dri)),
         "n" -> jsonString(name),
         "t" -> jsonString(text),
@@ -102,16 +118,25 @@ trait Resources(using ctx: DocContext) extends Locations, Writer:
       )
 
     def processPage(page: Page): Seq[JSON] =
-      val res =  page.content match
+      val res = page.content match
         case m: Member =>
           val descr = m.dri.asFileLocation
           def processMember(member: Member): Seq[JSON] =
-            val signatureBuilder = ScalaSignatureProvider.rawSignature(member, InlineSignatureBuilder()).asInstanceOf[InlineSignatureBuilder]
-            val sig = Signature(member.kind.name, " ") ++ Seq(Link(member.name, member.dri)) ++ signatureBuilder.names.reverse
-            val entry = mkEntry(member.dri, member.name, flattenToText(sig), descr)
+            val signatureBuilder = ScalaSignatureProvider
+              .rawSignature(member, InlineSignatureBuilder())
+              .asInstanceOf[InlineSignatureBuilder]
+            val sig = Signature(member.kind.name, " ") ++ Seq(
+              Link(member.name, member.dri)
+            ) ++ signatureBuilder.names.reverse
+            val entry =
+              mkEntry(member.dri, member.name, flattenToText(sig), descr)
             val children = member
-                .membersBy(m => m.kind != Kind.Package && !m.kind.isInstanceOf[Classlike])
-                .filter(m => m.origin == Origin.RegularlyDefined && m.inheritedFrom.isEmpty)
+              .membersBy(m =>
+                m.kind != Kind.Package && !m.kind.isInstanceOf[Classlike]
+              )
+              .filter(m =>
+                m.origin == Origin.RegularlyDefined && m.inheritedFrom.isEmpty
+              )
             Seq(entry) ++ children.flatMap(processMember)
 
           processMember(m)
@@ -122,7 +147,6 @@ trait Resources(using ctx: DocContext) extends Locations, Writer:
 
     val entries = pages.flatMap(processPage)
     Resource.Text(searchDataPath, s"pages = ${jsonList(entries)};")
-
 
   def allResources(pages: Seq[Page]): Seq[Resource] = memberResources ++ Seq(
     dottyRes("favicon.ico"),
@@ -159,7 +183,8 @@ trait Resources(using ctx: DocContext) extends Locations, Writer:
             report.error(s"Unable to find $name on classpath")
             Nil
           case is =>
-            try Seq(copy(is, path)) finally is.close()
+            try Seq(copy(is, path))
+            finally is.close()
       case Resource.File(path, file) =>
         Seq(copy(file, path))
       case Resource.URL(url) =>

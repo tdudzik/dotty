@@ -1,33 +1,33 @@
 package dotty.tools.scaladoc.util
 
-/**
- * This is trivial html renderer using api inspired by ScalaTags
- * It probably could be more efficient but for now on it should be good enough.
- */
+/** This is trivial html renderer using api inspired by ScalaTags It probably
+  * could be more efficient but for now on it should be good enough.
+  */
 object HTML:
   type AttrArg = AppliedAttr | Seq[AppliedAttr]
   type TagArg = AppliedTag | Seq[AppliedTag] | String | Seq[String]
 
   case class Tag(name: String):
-    def apply(tags: TagArg*): AppliedTag = apply()(tags:_*)
-    def apply(first: AttrArg, rest: AttrArg*): AppliedTag = apply((first +: rest):_*)()
+    def apply(tags: TagArg*): AppliedTag = apply()(tags: _*)
+    def apply(first: AttrArg, rest: AttrArg*): AppliedTag =
+      apply((first +: rest): _*)()
     def apply(attrs: AttrArg*)(tags: TagArg*): AppliedTag = {
       val sb = StringBuilder()
       sb.append(s"<$name")
-      attrs.filter(_ != Nil).foreach{
+      attrs.filter(_ != Nil).foreach {
         case s: Seq[AppliedAttr] =>
           s.foreach(sb.append(" ").append)
         case e: AppliedAttr =>
           sb.append(" ").append(e)
       }
       sb.append(">")
-      tags.foreach{
+      tags.foreach {
         case t: AppliedTag =>
           sb.append(t)
         case s: String =>
           sb.append(s.escapeReservedTokens)
         case s: Seq[AppliedTag | String] =>
-          s.foreach{
+          s.foreach {
             case a: AppliedTag =>
               sb.append(a)
             case s: String =>
@@ -38,12 +38,13 @@ object HTML:
       sb
     }
 
-  extension (s: String) private def escapeReservedTokens: String =
-    s.replace("&", "&amp;")
-      .replace("<", "&lt;")
-      .replace(">", "&gt;")
-      .replace("\"", "&quot;")
-      .replace("'", "&apos;")
+  extension (s: String)
+    private def escapeReservedTokens: String =
+      s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")
 
   case class Attr(name: String):
     def :=(value: String): AppliedAttr = new AppliedAttr(s"""$name="$value"""")
@@ -100,8 +101,8 @@ object HTML:
   val testId = Attr("data-test-id")
   val alt = Attr("alt")
   val value = Attr("value")
-  val onclick=Attr("onclick")
-  val titleAttr =Attr("title")
+  val onclick = Attr("onclick")
+  val titleAttr = Attr("title")
 
   def raw(content: String): AppliedTag = new AppliedTag(content)
   def raw(content: StringBuilder): AppliedTag = content

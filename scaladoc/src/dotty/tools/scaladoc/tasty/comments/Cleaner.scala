@@ -14,16 +14,23 @@ object Cleaner {
       // Remove trailing whitespaces
       TrailingWhitespace.replaceAllIn(line, "") match {
         case CleanCommentLine(ctl) => ctl
-        case tl => tl
+        case tl                    => tl
       }
     }
     val strippedComment = comment.trim.stripPrefix("/*").stripSuffix("*/")
-    val safeComment = DangerousTags.replaceAllIn(strippedComment, { htmlReplacement(_) })
-    val javadoclessComment = JavadocTags.replaceAllIn(safeComment, { javadocReplacement(_) })
+    val safeComment =
+      DangerousTags.replaceAllIn(strippedComment, { htmlReplacement(_) })
+    val javadoclessComment =
+      JavadocTags.replaceAllIn(safeComment, { javadocReplacement(_) })
     val markedTagComment =
-      SafeTags.replaceAllIn(javadoclessComment, { mtch =>
-        Matcher.quoteReplacement(s"$safeTagMarker${mtch.matched}$safeTagMarker")
-      })
+      SafeTags.replaceAllIn(
+        javadoclessComment,
+        { mtch =>
+          Matcher.quoteReplacement(
+            s"$safeTagMarker${mtch.matched}$safeTagMarker"
+          )
+        }
+      )
     markedTagComment.linesIterator.toList map (cleanLine)
   }
 }
