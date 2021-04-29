@@ -41,7 +41,7 @@ trait TypesSupport:
       .map(_.asSignature)
 
   given TreeSyntax: AnyRef with
-    extension(tpeTree: Tree)
+    extension (tpeTree: Tree)
       def asSignature: DocSignature =
         tpeTree match
           case TypeBoundsTree(low, high) =>
@@ -50,7 +50,7 @@ trait TypesSupport:
           case term: Term        => inner(term.tpe)
 
   given TypeSyntax: AnyRef with
-    extension(tpe: TypeRepr) def asSignature: DocSignature = inner(tpe)
+    extension (tpe: TypeRepr) def asSignature: DocSignature = inner(tpe)
 
   private def text(str: String): DocSignaturePart = str
 

@@ -51,7 +51,7 @@ class HtmlRenderer(rootPackage: Member, val members: Map[DRI, Member])(using
         val (indexes, templates) = siteContext.templates.partition(f =>
           f.templateFile
             .isIndexPage() && f.file.toPath.getParent() == siteContext.docsPath
-          )
+        )
         if (indexes.size > 1)
           val msg =
             s"ERROR: Multiple index pages for doc found ${indexes.map(_.file)}"

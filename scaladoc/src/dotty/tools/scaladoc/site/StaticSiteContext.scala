@@ -137,8 +137,7 @@ class StaticSiteContext(
               val msg =
                 s"Date $date in blog file: ${child.templateFile.name} doesn't match date from settings: $setDate."
               report.warn(msg, from)
-            case name
-              =>
+            case name =>
         }
 
         val processedTemplate = // Set provided name as arg in page for `docs`

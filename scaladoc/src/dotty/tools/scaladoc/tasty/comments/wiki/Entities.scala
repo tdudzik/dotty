@@ -4,9 +4,9 @@ package tasty.comments.wiki
 import scala.collection.{Seq => _, _}
 // import representations._
 
-/** A body of text. A comment has a single body, which is composed of
-  * at least one block. Inside every body is exactly one summary (see
-  * [[scala.tools.nsc.doc.model.comment.Summary]]).
+/** A body of text. A comment has a single body, which is composed of at least
+  * one block. Inside every body is exactly one summary (see
+  * [[scala.tools.nsc.doc.model.comment.Summary]] ).
   */
 final case class Body(blocks: Seq[Block]) {
 
@@ -50,9 +50,10 @@ final case class Code(data: String) extends Block
 final case class UnorderedList(items: Seq[Block]) extends Block
 final case class OrderedList(items: Seq[Block], style: String) extends Block
 final case class DefinitionList(items: SortedMap[Inline, Block]) extends Block
-object HorizontalRule extends Block
+object HorizontalRule
+    extends Block
 
-/** An section of text inside a block, possibly with formatting. */
+    /** An section of text inside a block, possibly with formatting. */
 sealed abstract class Inline extends WikiDocElement:
   def isEmpty = this match
     case Chain(items) if items.isEmpty => true
@@ -100,7 +101,9 @@ final case class HtmlTag(data: String) extends Inline {
   }
 }
 
-/** The summary of a comment, usually its first sentence. There must be exactly one summary per body. */
+/** The summary of a comment, usually its first sentence. There must be exactly
+  * one summary per body.
+  */
 final case class Summary(text: Inline) extends Inline
 
 sealed trait LinkTo

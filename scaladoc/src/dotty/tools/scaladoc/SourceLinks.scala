@@ -89,11 +89,11 @@ class SourceLinkParser(revision: Option[String]) extends ArgParser[SourceLink]:
           case "github" =>
             withRevision(rev =>
               WebBasedSourceLink(githubPrefix(organization, repo), rev, subPath)
-              )
+            )
           case "gitlab" =>
             withRevision(rev =>
               WebBasedSourceLink(gitlabPrefix(organization, repo), rev, subPath)
-              )
+            )
           case other =>
             Left(
               s"'$other' is not a known provider, please provide full source path template."
@@ -119,7 +119,7 @@ class SourceLinkParser(revision: Option[String]) extends ArgParser[SourceLink]:
                   pattern,
                   SupportedScalaDocPatternReplacements(pattern)
                 )
-                )
+              )
             )
           )
       case other =>

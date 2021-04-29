@@ -16,9 +16,11 @@ import dotty.tools.scaladoc.tasty.comments.Comment
 import java.nio.file.Paths
 import java.nio.file.Files
 
-/** Responsible for collectively inspecting all the Tasty files we're interested in.
+/** Responsible for collectively inspecting all the Tasty files we're interested
+  * in.
   *
-  * Delegates most of the work to [[TastyParser]] [[dotty.tools.scaladoc.tasty.TastyParser]].
+  * Delegates most of the work to [[TastyParser]]
+  * [[dotty.tools.scaladoc.tasty.TastyParser]].
   */
 case class ScaladocTastyInspector()(using ctx: DocContext)
     extends DocTastyInspector:

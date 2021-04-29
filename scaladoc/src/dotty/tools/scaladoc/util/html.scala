@@ -1,7 +1,7 @@
 package dotty.tools.scaladoc.util
 
-/** This is trivial html renderer using api inspired by ScalaTags
-  * It probably could be more efficient but for now on it should be good enough.
+/** This is trivial html renderer using api inspired by ScalaTags It probably
+  * could be more efficient but for now on it should be good enough.
   */
 object HTML:
   type AttrArg = AppliedAttr | Seq[AppliedAttr]

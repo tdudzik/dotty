@@ -6,9 +6,12 @@ import scala.collection.mutable
 import dotty.tools.scaladoc.tasty.comments.Regexes._
 
 /** Original wikiparser from NSC
-  * @author Ingo Maier
-  * @author Manohar Jonnalagedda
-  * @author Gilles Dubochet
+  * @author
+  *   Ingo Maier
+  * @author
+  *   Manohar Jonnalagedda
+  * @author
+  *   Gilles Dubochet
   */
 final class Parser(
     val buffer: String,
@@ -40,8 +43,8 @@ final class Parser(
     }
   }
 
-  /** listStyle ::= '-' spc | '1.' spc | 'I.' spc | 'i.' spc | 'A.' spc | 'a.' spc
-    * Characters used to build lists and their constructors
+  /** listStyle ::= '-' spc | '1.' spc | 'I.' spc | 'i.' spc | 'A.' spc | 'a.'
+    * spc Characters used to build lists and their constructors
     */
   protected val listStyles = Map[String, (Seq[Block] => Block)](
     "- " -> (UnorderedList(_)),
@@ -52,7 +55,9 @@ final class Parser(
     "a. " -> (OrderedList(_, "lowerAlpha"))
   )
 
-  /** Checks if the current line is formed with more than one space and one the listStyles */
+  /** Checks if the current line is formed with more than one space and one the
+    * listStyles
+    */
   def checkList =
     (countWhitespace > 0) && (listStyles.keys exists {
       checkSkipInitWhitespace(_)
@@ -60,14 +65,15 @@ final class Parser(
 
   /** {{{
     * nListBlock ::= nLine { mListBlock }
-    *      nLine ::= nSpc listStyle para '\n'
+    *     nLine ::= nSpc listStyle para '\n'
     * }}}
-    * Where n and m stand for the number of spaces. When `m > n`, a new list is nested.
+    * Where n and m stand for the number of spaces. When `m > n`, a new list is
+    * nested.
     */
   def listBlock(): Block = {
 
-    /** Consumes one list item block and returns it, or None if the block is
-      * not a list or a different list.
+    /** Consumes one list item block and returns it, or None if the block is not
+      * a list or a different list.
       */
     def listLine(indent: Int, style: String): Option[Block] =
       if (countWhitespace > indent && checkList) Some(listBlock())
@@ -81,8 +87,8 @@ final class Parser(
         Some(p)
       }
 
-    /** Consumes all list item blocks (possibly with nested lists) of the
-      * same list and returns the list block.
+    /** Consumes all list item blocks (possibly with nested lists) of the same
+      * list and returns the list block.
       */
     def listLevel(indent: Int, style: String): Block = {
       val lines = mutable.ListBuffer.empty[Block]
@@ -342,15 +348,16 @@ final class Parser(
       nextChar()
   }
 
-  /**  Eliminates the (common) leading spaces in all lines, based on the first line
-    *  For indented pieces of code, it reduces the indent to the least whitespace prefix:
-    *    {{{
+  /** Eliminates the (common) leading spaces in all lines, based on the first
+    * line For indented pieces of code, it reduces the indent to the least
+    * whitespace prefix:
+    * {{{
     *       indented example
     *       another indented line
     *       if (condition)
     *         then do something;
     *       ^ this is the least whitespace prefix
-    *    }}}
+    * }}}
     */
   def normalizeIndentation(_code: String): String = {
 
@@ -452,7 +459,8 @@ sealed class CharReader(buffer: String) { reader =>
   /* Jumpers */
 
   /** Jumps a character and consumes it
-    * @return true only if the correct character has been jumped
+    * @return
+    *   true only if the correct character has been jumped
     */
   final def jump(ch: Char): Boolean = {
     if (char == ch) {
@@ -462,7 +470,8 @@ sealed class CharReader(buffer: String) { reader =>
   }
 
   /** Jumps all the characters in chars, consuming them in the process.
-    * @return true only if the correct characters have been jumped
+    * @return
+    *   true only if the correct characters have been jumped
     */
   final def jump(chars: String): Boolean = {
     var index = 0

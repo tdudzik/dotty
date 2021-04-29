@@ -18,14 +18,19 @@ object Preparser {
       * into main body and tag bodies, then runs the `WikiParser` on each body
       * before creating the comment instance.
       *
-      * @param docBody     The body of the comment parsed until now.
-      * @param tags        All tags parsed until now.
-      * @param lastTagKey  The last parsed tag, or `None` if the tag section
-      *                    hasn't started. Lines that are not tagged are part
-      *                    of the previous tag or, if none exists, of the body.
-      * @param remaining   The lines that must still recursively be parsed.
-      * @param inCodeBlock Whether the next line is part of a code block (in
-      *                    which no tags must be read).
+      * @param docBody
+      *   The body of the comment parsed until now.
+      * @param tags
+      *   All tags parsed until now.
+      * @param lastTagKey
+      *   The last parsed tag, or `None` if the tag section hasn't started.
+      *   Lines that are not tagged are part of the previous tag or, if none
+      *   exists, of the body.
+      * @param remaining
+      *   The lines that must still recursively be parsed.
+      * @param inCodeBlock
+      *   Whether the next line is part of a code block (in which no tags must
+      *   be read).
       */
     def go(
         docBody: StringBuilder,
@@ -261,17 +266,20 @@ object Preparser {
   }
 
   /** A key used for a tag map. The key is built from the name of the tag and
-    * from the linked symbol if the tag has one.
-    * Equality on tag keys is structural.
+    * from the linked symbol if the tag has one. Equality on tag keys is
+    * structural.
     */
   private sealed abstract class TagKey {
     def name: String
   }
 
   private case class SimpleTagKey(name: String) extends TagKey
-  private case class SymbolTagKey(name: String, symbol: String) extends TagKey
+  private case class SymbolTagKey(name: String, symbol: String)
+      extends TagKey
 
-  /** Something that should not have happened, happened, and Scaladoc should exit. */
+      /** Something that should not have happened, happened, and Scaladoc should
+        * exit.
+        */
   private def oops(msg: String): Nothing =
     throw new IllegalArgumentException("program logic: " + msg)
 }

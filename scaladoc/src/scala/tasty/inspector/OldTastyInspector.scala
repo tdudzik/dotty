@@ -32,23 +32,29 @@ trait OldTastyInspector:
 
   /** Load and process TASTy files using TASTy reflect
     *
-    *  @param tastyFiles List of paths of `.tasty` files
+    * @param tastyFiles
+    *   List of paths of `.tasty` files
     */
   def inspectTastyFiles(tastyFiles: List[String]): Boolean =
     inspectAllTastyFiles(tastyFiles, Nil, Nil)
 
   /** Load and process TASTy files in a `jar` file using TASTy reflect
     *
-    *  @param jars Path of `.jar` file
+    * @param jars
+    *   Path of `.jar` file
     */
   def inspectTastyFilesInJar(jar: String): Boolean =
     inspectAllTastyFiles(Nil, List(jar), Nil)
 
   /** Load and process TASTy files using TASTy reflect
     *
-    *  @param tastyFiles List of paths of `.tasty` files
-    *  @param jars List of path of `.jar` files
-    *  @param dependenciesClasspath Classpath with extra dependencies needed to load class in the `.tasty` files
+    * @param tastyFiles
+    *   List of paths of `.tasty` files
+    * @param jars
+    *   List of path of `.jar` files
+    * @param dependenciesClasspath
+    *   Classpath with extra dependencies needed to load class in the `.tasty`
+    *   files
     */
   def inspectAllTastyFiles(
       tastyFiles: List[String],
@@ -72,10 +78,13 @@ trait OldTastyInspector:
 
   /** Load and process TASTy files using TASTy reflect and provided context
     *
-    *  Used in doctool to reuse reporter and setup provided by sbt
+    * Used in doctool to reuse reporter and setup provided by sbt
     *
-    *  @param classes List of paths of `.tasty` and `.jar` files (no validation is performed)
-    *  @param classpath Classpath with extra dependencies needed to load class in the `.tasty` files
+    * @param classes
+    *   List of paths of `.tasty` and `.jar` files (no validation is performed)
+    * @param classpath
+    *   Classpath with extra dependencies needed to load class in the `.tasty`
+    *   files
     */
   protected[inspector] def inspectFilesInContext(
       classpath: List[String],

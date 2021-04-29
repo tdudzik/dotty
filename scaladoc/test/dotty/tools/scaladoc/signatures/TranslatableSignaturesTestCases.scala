@@ -5,7 +5,8 @@ class GenericSignaftures
 
 class ObjectSignatures extends SignatureTest("objectSignatures", Seq("object"))
 
-class TraitSignatures extends SignatureTest("traitSignatures", Seq("trait"))
+class TraitSignatures
+    extends SignatureTest("traitSignatures", Seq("trait"))
 
 // We do not support companion objects properly in tests
 class ClassSignatureTestSourceTest

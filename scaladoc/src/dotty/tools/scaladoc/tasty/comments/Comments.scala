@@ -38,7 +38,9 @@ case class Comment(
     groupDesc: SortedMap[String, DocPart],
     groupNames: SortedMap[String, DocPart],
     groupPrio: SortedMap[String, Int],
-    /** List of conversions to hide - containing e.g: `scala.Predef.FloatArrayOps` */
+    /** List of conversions to hide - containing e.g:
+      * `scala.Predef.FloatArrayOps`
+      */
     hideImplicitConversions: List[DocPart]
 )
 

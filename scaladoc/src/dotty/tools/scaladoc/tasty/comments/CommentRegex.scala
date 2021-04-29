@@ -6,14 +6,14 @@ import scala.util.matching.Regex
 object Regexes {
   val TrailingWhitespace = """\s+$""".r
 
-  /** The body of a line, dropping the (optional) start star-marker,
-    * one leading whitespace and all trailing whitespace
+  /** The body of a line, dropping the (optional) start star-marker, one leading
+    * whitespace and all trailing whitespace
     */
   val CleanCommentLine =
     new Regex("""(?:\s*\*\s?\s?)?(.*)""")
 
-  /** Dangerous HTML tags that should be replaced by something safer,
-    * such as wiki syntax, or that should be dropped
+  /** Dangerous HTML tags that should be replaced by something safer, such as
+    * wiki syntax, or that should be dropped
     */
   val DangerousTags =
     new Regex("""<(/?(div|ol|ul|li|h[1-6]|p))( [^>]*)?/?>|<!--.*-->""")
@@ -26,7 +26,9 @@ object Regexes {
       """\{\@(code|docRoot|linkplain|link|literal|value)\p{Zs}*([^}]*)\}"""
     )
 
-  /** Maps a javadoc tag to a useful wiki replacement, or an empty string if it cannot be salvaged. */
+  /** Maps a javadoc tag to a useful wiki replacement, or an empty string if it
+    * cannot be salvaged.
+    */
   def javadocReplacement(mtch: Regex.Match): String = {
     mtch.group(1) match {
       case "code"      => "<code>" + mtch.group(2) + "</code>"
@@ -70,7 +72,9 @@ object Regexes {
   val SingleTagRegex =
     new Regex("""\s*@(\S+)\s*""")
 
-  /** A Scaladoc tag not linked to a symbol. Returns the name of the tag, and the rest of the line. */
+  /** A Scaladoc tag not linked to a symbol. Returns the name of the tag, and
+    * the rest of the line.
+    */
   val SimpleTagRegex =
     new Regex("""\s*@(\S+)\s+(.*)""")
 

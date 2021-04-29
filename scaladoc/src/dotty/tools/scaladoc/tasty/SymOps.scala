@@ -213,7 +213,7 @@ class SymOps[Q <: Quotes](val q: Q)
                 .flatMap(path =>
                   dctx.externalDocumentationLinks
                     .find(_.originRegexes.exists(r => r.matches(path)))
-                    )
+                )
               externalLinkCache += (csym.associatedFile -> calculatedLink)
               calculatedLink
             }

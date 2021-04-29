@@ -15,9 +15,12 @@ import parsing.Parsers.Parser
 import reporting.ProperDefinitionNotFound
 
 /** Port of DocComment.scala from nsc
-  * @author Martin Odersky
-  * @author Felix Mulder
-  * @author Aleksander Boruch-Gruszecki
+  * @author
+  *   Martin Odersky
+  * @author
+  *   Felix Mulder
+  * @author
+  *   Aleksander Boruch-Gruszecki
   */
 class CommentExpander {
   import scala.collection.mutable
@@ -28,13 +31,17 @@ class CommentExpander {
     expandedDocComment(sym, parent)
   }
 
-  /** The cooked doc comment of symbol `sym` after variable expansion, or "" if missing.
+  /** The cooked doc comment of symbol `sym` after variable expansion, or "" if
+    * missing.
     *
-    *  @param sym  The symbol for which doc comment is returned
-    *  @param site The class for which doc comments are generated
-    *  @throws ExpansionLimitExceeded  when more than 10 successive expansions
-    *                                  of the same string are done, which is
-    *                                  interpreted as a recursive variable definition.
+    * @param sym
+    *   The symbol for which doc comment is returned
+    * @param site
+    *   The class for which doc comments are generated
+    * @throws
+    *   ExpansionLimitExceeded when more than 10 successive expansions of the
+    *   same string are done, which is interpreted as a recursive variable
+    *   definition.
     */
   def expandedDocComment(sym: Symbol, site: Symbol, docStr: String = "")(using
       Context
@@ -69,10 +76,10 @@ class CommentExpander {
 
   private val cookedDocComments = MutableSymbolMap[String]()
 
-  /** The raw doc comment of symbol `sym`, minus usecase and define sections, augmented by
-    *  missing sections of an inherited doc comment.
-    *  If a symbol does not have a doc comment but some overridden version of it does,
-    *  the doc comment of the overridden version is copied instead.
+  /** The raw doc comment of symbol `sym`, minus usecase and define sections,
+    * augmented by missing sections of an inherited doc comment. If a symbol
+    * does not have a doc comment but some overridden version of it does, the
+    * doc comment of the overridden version is copied instead.
     */
   def cookedDocComment(sym: Symbol, docStr: String = "")(using
       Context
@@ -164,19 +171,24 @@ class CommentExpander {
   }
 
   /** Expand inheritdoc tags
-    *  - for the main comment we transform the inheritdoc into the super variable,
-    *  and the variable expansion can expand it further
-    *  - for the param, tparam and throws sections we must replace comments on the spot
+    *   - for the main comment we transform the inheritdoc into the super
+    *     variable, and the variable expansion can expand it further
+    *   - for the param, tparam and throws sections we must replace comments on
+    *     the spot
     *
     * This is done separately, for two reasons:
-    * 1. It takes longer to run compared to merge
-    * 2. The inheritdoc annotation should not be used very often, as building the comment from pieces severely
-    * impacts performance
+    *   1. It takes longer to run compared to merge 2. The inheritdoc annotation
+    *      should not be used very often, as building the comment from pieces
+    *      severely impacts performance
     *
-    * @param parent The source (or parent) comment
-    * @param child  The child (overriding member or usecase) comment
-    * @param sym    The child symbol
-    * @return       The child comment with the inheritdoc sections expanded
+    * @param parent
+    *   The source (or parent) comment
+    * @param child
+    *   The child (overriding member or usecase) comment
+    * @param sym
+    *   The child symbol
+    * @return
+    *   The child comment with the inheritdoc sections expanded
     */
   def expandInheritdoc(parent: String, child: String, sym: Symbol): String =
     if (child.indexOf("@inheritdoc") == -1) child
@@ -334,8 +346,8 @@ class CommentExpander {
     }
   }
 
-  /** Maps symbols to the variable -> replacement maps that are defined
-    *  in their doc comments
+  /** Maps symbols to the variable -> replacement maps that are defined in their
+    * doc comments
     */
   val defs =
     mutable.HashMap[Symbol, Map[String, String]]() withDefaultValue Map()
@@ -348,8 +360,10 @@ class CommentExpander {
 
   /** Lookup definition of variable.
     *
-    *  @param vble  The variable for which a definition is searched
-    *  @param site  The class for which doc comments are generated
+    * @param vble
+    *   The variable for which a definition is searched
+    * @param site
+    *   The class for which doc comments are generated
     */
   def lookupVariable(vble: String, site: Symbol)(using
       Context
@@ -368,16 +382,17 @@ class CommentExpander {
       }
   }
 
-  /** The position of the raw doc comment of symbol `sym`, or NoPosition if missing
-    *  If a symbol does not have a doc comment but some overridden version of it does,
-    *  the position of the doc comment of the overridden version is returned instead.
+  /** The position of the raw doc comment of symbol `sym`, or NoPosition if
+    * missing If a symbol does not have a doc comment but some overridden
+    * version of it does, the position of the doc comment of the overridden
+    * version is returned instead.
     */
   def docCommentPos(sym: Symbol)(using Context): Span =
     ctx.docCtx.flatMap(_.docstring(sym).map(_.span)).getOrElse(NoSpan)
 
-  /** A version which doesn't consider self types, as a temporary measure:
-    *  an infinite loop has broken out between superComment and cookedDocComment
-    *  since r23926.
+  /** A version which doesn't consider self types, as a temporary measure: an
+    * infinite loop has broken out between superComment and cookedDocComment
+    * since r23926.
     */
   private def allInheritedOverriddenSymbols(
       sym: Symbol
@@ -437,7 +452,9 @@ object CommentExpander {
     newComment
   }
 
-  /** Expands comment of `sym`, but only after expanding all comments necessary to perform that. */
+  /** Expands comment of `sym`, but only after expanding all comments necessary
+    * to perform that.
+    */
   private def expandComment(sym: Symbol)(using Context)(using
       docCtx: ContextDocstrings
   ): Option[Comment] =

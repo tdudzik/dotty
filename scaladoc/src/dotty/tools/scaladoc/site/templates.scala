@@ -38,12 +38,16 @@ case class RenderingContext(
 
 case class ResolvedPage(code: String, resources: List[String] = Nil)
 
-/** case class for the template files.
-  * Template file is a file `.md` or `.html` handling settings.
+/** case class for the template files. Template file is a file `.md` or `.html`
+  * handling settings.
   *
-  * @param file     The Actual file defining the template.
-  * @param rawCode  The content, what is to be shown, everything but settings.
-  * @param settings The config defined in the begging of the file, between the pair of `---` (e.g. layout: basic).
+  * @param file
+  *   The Actual file defining the template.
+  * @param rawCode
+  *   The content, what is to be shown, everything but settings.
+  * @param settings
+  *   The config defined in the begging of the file, between the pair of `---`
+  *   (e.g. layout: basic).
   */
 case class TemplateFile(
     file: File,
@@ -70,7 +74,7 @@ case class TemplateFile(
         name,
         throw new RuntimeException(s"No layouts named $name in ${ctx.layouts}")
       )
-      )
+    )
 
     def asJavaElement(o: Object): Object = o match
       case m: Map[_, _] =>
