@@ -15,7 +15,8 @@ trait Writer(using ctx: DocContext) extends Locations:
 
   private def dest(path: String) =
     val absPath = args.output.toPath.resolve(path)
-    if !Files.exists(absPath.getParent) then Files.createDirectories(absPath.getParent)
+    if !Files.exists(absPath.getParent) then
+      Files.createDirectories(absPath.getParent)
     absPath
 
   def write(dri: DRI, content: AppliedTag): String =

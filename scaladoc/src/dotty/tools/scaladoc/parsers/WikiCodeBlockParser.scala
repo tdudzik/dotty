@@ -14,7 +14,6 @@ import java.{util => ju}
 import ju.regex.Matcher
 import ju.regex.Pattern
 
-
 /** Copied from FencedCodeBlockParser. */
 object WikiCodeBlockParser {
   private val OPENING_FENCE = Pattern.compile("^\\{{3}")
@@ -22,26 +21,30 @@ object WikiCodeBlockParser {
 
   class Factory extends CustomBlockParserFactory {
     override def getAfterDependents =
-      new ju.HashSet[Class[_ <: CustomBlockParserFactory]](ju.Arrays.asList(
-        classOf[BlockQuoteParser.Factory],
-        classOf[HeadingParser.Factory],
-        //FencedCodeBlockParser.Factory.class,
-        //HtmlBlockParser.Factory.class,
-        //ThematicBreakParser.Factory.class,
-        //ListBlockParser.Factory.class,
-        //IndentedCodeBlockParser.Factory.class
-      ))
+      new ju.HashSet[Class[_ <: CustomBlockParserFactory]](
+        ju.Arrays.asList(
+          classOf[BlockQuoteParser.Factory],
+          classOf[HeadingParser.Factory]
+          //FencedCodeBlockParser.Factory.class,
+          //HtmlBlockParser.Factory.class,
+          //ThematicBreakParser.Factory.class,
+          //ListBlockParser.Factory.class,
+          //IndentedCodeBlockParser.Factory.class
+        )
+      )
 
     override def getBeforeDependents =
-      new ju.HashSet[Class[_ <: CustomBlockParserFactory]](ju.Arrays.asList(
-        //BlockQuoteParser.Factory.class,
-        //HeadingParser.Factory.class,
-        //FencedCodeBlockParser.Factory.class,
-        classOf[HtmlBlockParser.Factory],
-        classOf[ThematicBreakParser.Factory],
-        classOf[ListBlockParser.Factory],
-        classOf[IndentedCodeBlockParser.Factory],
-      ))
+      new ju.HashSet[Class[_ <: CustomBlockParserFactory]](
+        ju.Arrays.asList(
+          //BlockQuoteParser.Factory.class,
+          //HeadingParser.Factory.class,
+          //FencedCodeBlockParser.Factory.class,
+          classOf[HtmlBlockParser.Factory],
+          classOf[ThematicBreakParser.Factory],
+          classOf[ListBlockParser.Factory],
+          classOf[IndentedCodeBlockParser.Factory]
+        )
+      )
 
     override def affectsGlobalScope = false
 
@@ -49,9 +52,12 @@ object WikiCodeBlockParser {
       new WikiCodeBlockParser.BlockFactory(options)
   }
 
-  private[WikiCodeBlockParser] class BlockFactory (val options: DataHolder)
-  extends AbstractBlockParserFactory(options) {
-    def tryStart(state: ParserState, matchedBlockParser: MatchedBlockParser): BlockStart = {
+  private[WikiCodeBlockParser] class BlockFactory(val options: DataHolder)
+      extends AbstractBlockParserFactory(options) {
+    def tryStart(
+        state: ParserState,
+        matchedBlockParser: MatchedBlockParser
+    ): BlockStart = {
       val nextNonSpace = state.getNextNonSpaceIndex
       val line = state.getLine
       var matcher: Matcher = null
@@ -61,8 +67,15 @@ object WikiCodeBlockParser {
         if matcher.find then {
           val fenceLength = matcher.group(0).length
           val blockParser =
-            new WikiCodeBlockParser(state.getProperties, fenceLength, state.getIndent, nextNonSpace)
-          blockParser.block.setOpeningMarker(trySequence.subSequence(0, fenceLength))
+            new WikiCodeBlockParser(
+              state.getProperties,
+              fenceLength,
+              state.getIndent,
+              nextNonSpace
+            )
+          blockParser.block.setOpeningMarker(
+            trySequence.subSequence(0, fenceLength)
+          )
           return BlockStart.of(blockParser).atIndex(nextNonSpace + fenceLength)
         }
       }
@@ -73,10 +86,10 @@ object WikiCodeBlockParser {
 
 /** Copied from FencedCodeBlockParser. */
 class WikiCodeBlockParser(
-  options: DataHolder,
-  var fenceLength: Int,
-  private var fenceIndent: Int,
-  private var fenceMarkerIndent: Int
+    options: DataHolder,
+    var fenceLength: Int,
+    private var fenceIndent: Int,
+    private var fenceMarkerIndent: Int
 ) extends AbstractBlockParser {
 
   this.fenceMarkerIndent = fenceIndent + fenceMarkerIndent
@@ -95,7 +108,7 @@ class WikiCodeBlockParser(
     var matcher: Matcher = null
     val matches =
       state.getIndent <= 3
-      && nextNonSpace < line.length
+        && nextNonSpace < line.length
 
     if matches then {
       val trySequence = line.subSequence(nextNonSpace, line.length)
@@ -123,7 +136,8 @@ class WikiCodeBlockParser(
     content.add(line, state.getIndent)
   }
 
-  override def isPropagatingLastBlankLine(lastMatchedBlockParser: BlockParser) = false
+  override def isPropagatingLastBlankLine(lastMatchedBlockParser: BlockParser) =
+    false
 
   override def closeBlock(state: ParserState): Unit = { // first line, if not blank, has the info string
     val lines = content.getLines
@@ -131,7 +145,8 @@ class WikiCodeBlockParser(
       val info = lines.get(0)
       if (!info.isBlank) block.setInfo(info.trim)
       val chars = content.getSpanningChars
-      val spanningChars = chars.baseSubSequence(chars.getStartOffset, lines.get(0).getEndOffset)
+      val spanningChars =
+        chars.baseSubSequence(chars.getStartOffset, lines.get(0).getEndOffset)
       if (lines.size > 1) { // have more lines
         val segments = lines.subList(1, lines.size)
         block.setContent(spanningChars, segments)
@@ -144,12 +159,9 @@ class WikiCodeBlockParser(
           val codeBlock = new Text(SegmentedSequence.of(segments))
           block.appendChild(codeBlock)
         }
-      }
-      else block.setContent(spanningChars, BasedSequence.EMPTY_LIST)
-    }
-    else block.setContent(content)
+      } else block.setContent(spanningChars, BasedSequence.EMPTY_LIST)
+    } else block.setContent(content)
     block.setCharsFromContent
     content = null
   }
 }
-

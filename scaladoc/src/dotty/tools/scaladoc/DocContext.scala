@@ -30,7 +30,6 @@ def relativePath(p: Path)(using Context): Path =
   val absPath = p.toAbsolutePath
   if absPath.startsWith(root) then root.relativize(p.toAbsolutePath()) else p
 
-
 def throwableToString(t: Throwable)(using CompilerContext): String =
   val os = new ByteArrayOutputStream
   t.printStackTrace(new PrintStream(os))
@@ -39,22 +38,25 @@ def throwableToString(t: Throwable)(using CompilerContext): String =
   else stLinkes.take(5).mkString("\n")
 
 private def sourcePostionFor(f: File)(using CompilerContext) =
-    val relPath = relativePath(f.toPath)
-    val virtualFile = new VirtualFile(relPath.toString, relPath.toString)
-    val sourceFile = new SourceFile(virtualFile, Codec.UTF8)
-    SourcePosition(sourceFile, Spans.NoSpan)
+  val relPath = relativePath(f.toPath)
+  val virtualFile = new VirtualFile(relPath.toString, relPath.toString)
+  val sourceFile = new SourceFile(virtualFile, Codec.UTF8)
+  SourcePosition(sourceFile, Spans.NoSpan)
 
 // TODO (https://github.com/lampepfl/scala3doc/issues/238): provide proper error handling
-private def createMessage(
-  msg: String, file: File, e: Throwable | Null)(using CompilerContext): String =
-    val localizedMessage = s"$file: $msg"
-    e match
-      case null => localizedMessage
-      case throwable: Throwable =>
-         s"$localizedMessage \ncaused by: ${throwableToString(throwable)}"
+private def createMessage(msg: String, file: File, e: Throwable | Null)(using
+    CompilerContext
+): String =
+  val localizedMessage = s"$file: $msg"
+  e match
+    case null => localizedMessage
+    case throwable: Throwable =>
+      s"$localizedMessage \ncaused by: ${throwableToString(throwable)}"
 
 extension (r: report.type)
-  def error(m: String, f: File, e: Throwable | Null = null)(using CompilerContext): Unit =
+  def error(m: String, f: File, e: Throwable | Null = null)(using
+      CompilerContext
+  ): Unit =
     r.error(createMessage(m, f, e), sourcePostionFor(f))
 
   def warn(m: String, f: File, e: Throwable)(using CompilerContext): Unit =
@@ -69,11 +71,14 @@ extension (r: report.type)
 case class NavigationNode(name: String, dri: DRI, nested: Seq[NavigationNode])
 
 case class DocContext(args: Scaladoc.Args, compilerContext: CompilerContext):
-  lazy val sourceLinks = SourceLinks.load(args.sourceLinks, args.revision)(using compilerContext)
-  lazy val staticSiteContext = args.docsRoot.map(path => StaticSiteContext(
+  lazy val sourceLinks =
+    SourceLinks.load(args.sourceLinks, args.revision)(using compilerContext)
+  lazy val staticSiteContext = args.docsRoot.map(path =>
+    StaticSiteContext(
       File(path).getAbsoluteFile(),
       args,
       sourceLinks
-    )(using compilerContext))
+    )(using compilerContext)
+  )
 
   val externalDocumentationLinks = args.externalMappings
