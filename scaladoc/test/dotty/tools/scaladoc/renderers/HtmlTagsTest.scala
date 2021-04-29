@@ -30,7 +30,8 @@ class HtmlTagsTest {
   @Test
   def divWithTextInside = {
     val actual = div(h1(), span("Some text"), "Some more of the text").toString
-    val expect = """<div><h1></h1><span>Some text</span>Some more of the text</div>"""
+    val expect =
+      """<div><h1></h1><span>Some text</span>Some more of the text</div>"""
     assertEquals(expect, actual)
   }
 
@@ -73,17 +74,18 @@ class HtmlTagsTest {
   def nestedTagsWithAttributes = {
     val actual = html(
       head(
-        script(src:="..."),
+        script(src := "..."),
         script(raw("alert('Hello World')"))
       ),
       body(
         div(
-          h1(id:="title")("This is a title"),
+          h1(id := "title")("This is a title"),
           p("This is a big paragraph of text")
         )
       )
     ).toString
-    val expect = """<html><head><script src="..."></script><script>alert('Hello World')</script></head><body><div><h1 id="title">This is a title</h1><p>This is a big paragraph of text</p></div></body></html>"""
+    val expect =
+      """<html><head><script src="..."></script><script>alert('Hello World')</script></head><body><div><h1 id="title">This is a title</h1><p>This is a big paragraph of text</p></div></body></html>"""
     assertEquals(expect, actual)
   }
 
@@ -94,18 +96,19 @@ class HtmlTagsTest {
         script("some script")
       ),
       body(
-        h1(style:="background-color: blue; color: red;")("This is my title"),
-        div(style:="background-color: blue; color: red;")(
-        p(cls :="contentpara first")(
-          "This is my first paragraph"
-        ),
-        a(style:="opacity: 0.9;")(
-          p(cls := "contentpara")("Goooogle")
-        )
+        h1(style := "background-color: blue; color: red;")("This is my title"),
+        div(style := "background-color: blue; color: red;")(
+          p(cls := "contentpara first")(
+            "This is my first paragraph"
+          ),
+          a(style := "opacity: 0.9;")(
+            p(cls := "contentpara")("Goooogle")
+          )
         )
       )
     ).toString
-    val expect = """<html><head><script>some script</script></head><body><h1 style="background-color: blue; color: red;">This is my title</h1><div style="background-color: blue; color: red;"><p class="contentpara first">This is my first paragraph</p><a style="opacity: 0.9;"><p class="contentpara">Goooogle</p></a></div></body></html>"""
+    val expect =
+      """<html><head><script>some script</script></head><body><h1 style="background-color: blue; color: red;">This is my title</h1><div style="background-color: blue; color: red;"><p class="contentpara first">This is my first paragraph</p><a style="opacity: 0.9;"><p class="contentpara">Goooogle</p></a></div></body></html>"""
     assertEquals(expect, actual)
   }
 
@@ -125,8 +128,16 @@ class HtmlTagsTest {
 
   @Test
   def mixingAllTagArgs = {
-    val actual = div("String", Seq("SeqString"), h1("AppliedTag"), Seq(h1("SeqAppliedTag")), Seq("SeqString"), h1("AppliedTag")).toString
-    val expect = """<div>StringSeqString<h1>AppliedTag</h1><h1>SeqAppliedTag</h1>SeqString<h1>AppliedTag</h1></div>"""
+    val actual = div(
+      "String",
+      Seq("SeqString"),
+      h1("AppliedTag"),
+      Seq(h1("SeqAppliedTag")),
+      Seq("SeqString"),
+      h1("AppliedTag")
+    ).toString
+    val expect =
+      """<div>StringSeqString<h1>AppliedTag</h1><h1>SeqAppliedTag</h1>SeqString<h1>AppliedTag</h1></div>"""
     assertEquals(expect, actual)
   }
 
@@ -146,15 +157,25 @@ class HtmlTagsTest {
 
   @Test
   def seqAppliedAttrAndSeqAppliedAttr = {
-    val actual = div(Seq(cls := "someClass"), Seq(style := "some: style;")).toString
+    val actual =
+      div(Seq(cls := "someClass"), Seq(style := "some: style;")).toString
     val expect = """<div class="someClass" style="some: style;"></div>"""
     assertEquals(expect, actual)
   }
 
   @Test
   def mixingAllTagArgsAndAllAttrArgs = {
-    val actual = div(Seq(cls := "someClass"), id := "myId", Seq(style := "some: style;"))("String", Seq("SeqString"), h1("AppliedTag"), Seq(h1("SeqAppliedTag")), Seq("SeqString"), h1("AppliedTag")).toString
-    val expect = """<div class="someClass" id="myId" style="some: style;">StringSeqString<h1>AppliedTag</h1><h1>SeqAppliedTag</h1>SeqString<h1>AppliedTag</h1></div>"""
+    val actual =
+      div(Seq(cls := "someClass"), id := "myId", Seq(style := "some: style;"))(
+        "String",
+        Seq("SeqString"),
+        h1("AppliedTag"),
+        Seq(h1("SeqAppliedTag")),
+        Seq("SeqString"),
+        h1("AppliedTag")
+      ).toString
+    val expect =
+      """<div class="someClass" id="myId" style="some: style;">StringSeqString<h1>AppliedTag</h1><h1>SeqAppliedTag</h1>SeqString<h1>AppliedTag</h1></div>"""
     assertEquals(expect, actual)
   }
 
@@ -190,8 +211,13 @@ class HtmlTagsTest {
 
   @Test
   def nilAmongArgsAndTags = {
-    val actual = div(cls := "someClass", Nil, style := "some: style;")("name", Nil, div("ala")).toString
-    val expect = """<div class="someClass" style="some: style;">name<div>ala</div></div>"""
+    val actual = div(cls := "someClass", Nil, style := "some: style;")(
+      "name",
+      Nil,
+      div("ala")
+    ).toString
+    val expect =
+      """<div class="someClass" style="some: style;">name<div>ala</div></div>"""
     assertEquals(expect, actual)
   }
 }

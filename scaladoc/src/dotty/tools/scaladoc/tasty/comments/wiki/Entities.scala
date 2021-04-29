@@ -6,7 +6,8 @@ import scala.collection.{Seq => _, _}
 
 /** A body of text. A comment has a single body, which is composed of
   * at least one block. Inside every body is exactly one summary (see
-  * [[scala.tools.nsc.doc.model.comment.Summary]]). */
+  * [[scala.tools.nsc.doc.model.comment.Summary]]).
+  */
 final case class Body(blocks: Seq[Block]) {
 
   /** The summary text of the comment body. */
@@ -31,9 +32,9 @@ final case class Body(blocks: Seq[Block]) {
       case _                 => Nil
     }
     (blocks flatMap summaryInBlock).toList match {
-      case Nil => None
+      case Nil        => None
       case inl :: Nil => Some(Body(Seq(Paragraph(inl))))
-      case inls => Some(Body(Seq(Paragraph(Chain(inls)))))
+      case inls       => Some(Body(Seq(Paragraph(Chain(inls)))))
     }
   }
 }
@@ -49,13 +50,14 @@ final case class Code(data: String) extends Block
 final case class UnorderedList(items: Seq[Block]) extends Block
 final case class OrderedList(items: Seq[Block], style: String) extends Block
 final case class DefinitionList(items: SortedMap[Inline, Block]) extends Block
-object HorizontalRule extends Block
+object HorizontalRule
+    extends Block
 
-/** An section of text inside a block, possibly with formatting. */
+    /** An section of text inside a block, possibly with formatting. */
 sealed abstract class Inline extends WikiDocElement:
   def isEmpty = this match
     case Chain(items) if items.isEmpty => true
-    case _ => false
+    case _                             => false
 
 final case class Chain(items: Seq[Inline]) extends Inline
 object Chain {
@@ -69,16 +71,22 @@ final case class Subscript(text: Inline) extends Inline
 final case class Link(link: DocLink, title: Option[Inline]) extends Inline
 final case class Monospace(text: Inline) extends Inline
 final case class Text(text: String) extends Inline
-abstract class RepresentationLink(val title: Inline) extends Inline { def link: LinkTo }
+abstract class RepresentationLink(val title: Inline) extends Inline {
+  def link: LinkTo
+}
 object RepresentationLink {
-  def apply(title: Inline, linkTo: LinkTo) = new RepresentationLink(title) { def link: LinkTo = linkTo }
-  def unapply(el: RepresentationLink): Some[(Inline, LinkTo)] = Some((el.title, el.link))
+  def apply(title: Inline, linkTo: LinkTo) = new RepresentationLink(title) {
+    def link: LinkTo = linkTo
+  }
+  def unapply(el: RepresentationLink): Some[(Inline, LinkTo)] = Some(
+    (el.title, el.link)
+  )
 }
 final case class HtmlTag(data: String) extends Inline {
   private val Pattern = """(?ms)\A<(/?)(.*?)[\s>].*\z""".r
   private val (isEnd, tagName) = data match {
     case Pattern(s1, s2) =>
-      (! s1.isEmpty, Some(s2.toLowerCase))
+      (!s1.isEmpty, Some(s2.toLowerCase))
     case _ =>
       (false, None)
   }
@@ -88,7 +96,9 @@ final case class HtmlTag(data: String) extends Inline {
   }
 
   private val TagsNotToClose = Set("br", "img")
-  def close = tagName collect { case name if !TagsNotToClose(name) => HtmlTag(s"</$name>") }
+  def close = tagName collect {
+    case name if !TagsNotToClose(name) => HtmlTag(s"</$name>")
+  }
 }
 
 /** The summary of a comment, usually its first sentence. There must be exactly one summary per body. */
